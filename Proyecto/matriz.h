@@ -7,87 +7,7 @@ void print_number(LedControl matriz, int number);
 
 
 //  CARACTERES   [A-Z0-9*#$!]
-const bool caracteres [11][5][3] {
-    {
-        //0
-        {1,1,1},
-        {1,0,1},
-        {1,0,1},
-        {1,0,1},
-        {1,1,1},
-    },
-    {
-        //1
-        {0,0,1},
-        {0,0,1},
-        {0,0,1},
-        {0,0,1},
-        {0,0,1},
-    },
-    {
-        //2
-        {1,1,1},
-        {0,0,1},
-        {1,1,1},
-        {1,0,0},
-        {1,1,1},
-    },
-    {
-        //3
-        {1,1,1},
-        {0,0,1},
-        {1,1,1},
-        {0,0,1},
-        {1,1,1},
-    },
-    {
-        //4
-        {1,0,1},
-        {1,0,1},
-        {1,1,1},
-        {0,0,1},
-        {0,0,1},
-    },
-    {
-        //5
-        {1,1,1},
-        {1,0,0},
-        {1,1,1},
-        {0,0,1},
-        {1,1,1},
-    },
-    {
-        //6
-        {1,1,1},
-        {1,0,0},
-        {1,1,1},
-        {1,0,1},
-        {1,1,1},
-    },
-    {
-        //7
-        {1,1,1},
-        {0,0,1},
-        {0,0,1},
-        {0,0,1},
-        {0,0,1},
-    },
-    {
-        //8
-        {1,1,1},
-        {1,0,1},
-        {1,1,1},
-        {1,0,1},
-        {1,1,1},
-    },
-    {
-        //9
-        {1,1,1},
-        {1,0,1},
-        {1,1,1},
-        {0,0,1},
-        {0,0,1},
-    },
+const bool caracteres [31][5][3] {
     {
         //A
         {1,1,1},
@@ -335,7 +255,7 @@ const bool caracteres [11][5][3] {
         {0,1,0},
         {0,0,0},
         {0,1,0},
-    },
+    }
 };
 
 void matriz_imprime_caracteres(LedControl matriz, int numero){
@@ -353,8 +273,8 @@ void matriz_imprime_caracteres(LedControl matriz, int numero){
     };
 
     // Estas líneas descomponen el número en unidades y decenas.
-    int unidades = numero % 11;
-    int decenas = numero / 11;
+    int unidades = numero % 32;
+    int decenas = numero / 32;
 
      for (int i = 0; i < 5; i++){
         for (int j = 0; j < 3; j++){
