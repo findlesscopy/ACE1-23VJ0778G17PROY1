@@ -4,7 +4,6 @@
 #include <Arduino.h>
 #include <LiquidCrystal.h>
 #include <LedControl.h>
-#include <Key.h>
 #include <Keypad.h>
 
 #include "button.h"
@@ -140,13 +139,16 @@ void menu_principal()
     lcd.setCursor(0, 0);         // Establece el cursor en la posición (1, 0) de la pantalla LCD.
     lcd.print("Menu Principal"); // Imprime el mensaje "Bienvenido" en la pantalla LCD.
 
+    delay(300); // Pausa de 0.3 segundos
+    lcd.setCursor(0, 1);
+    lcd.print("0. Letras");
     // Imprime diferentes nombres en la pantalla LCD.
     delay(300);          // Pausa de 0.3 segundos
-    lcd.setCursor(0, 1); // Establece el cursor en la posición (0, 1) de la pantalla LCD.
+    lcd.setCursor(0, 2); // Establece el cursor en la posición (0, 1) de la pantalla LCD.
     lcd.print("1. Login");
 
     delay(300); // Pausa de 0.3 segundos
-    lcd.setCursor(0, 2);
+    lcd.setCursor(0, 3);
     lcd.print("2. Registro");
 
     delay(300); // Pausa de 0.3 segundos
