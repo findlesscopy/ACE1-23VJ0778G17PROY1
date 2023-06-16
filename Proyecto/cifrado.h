@@ -3,13 +3,13 @@
 
 #include <Arduino.h>
 
-void dobleCifradoXOR(char mensaje[]);
+void dobleCifradoXOR(char* mensaje);
 void dobleDescifradoXOR(char mensaje[]);
 
 const int clave1 = 9;
 const int clave2 = 1;
 
-void dobleCifradoXOR(char mensaje[]) {
+void dobleCifradoXOR(char* mensaje) {
     int longitud = strlen(mensaje);
 
   

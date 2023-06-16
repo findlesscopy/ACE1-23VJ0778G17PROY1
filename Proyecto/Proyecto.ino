@@ -11,32 +11,13 @@
 
 #include "main.h"
 #include "eeprom_controller.h"
-#include "cifrado.h"
 
 void setup() {
-    /*Serial.begin(9600);
+    Serial.begin(9600);
     Serial1.begin(9600);
     reset_eeprom(); // ! Just for the first time
-    menu_setup();*/
-    Serial.begin(9600);
+    menu_setup();
 
-  char mensajeOriginal[] = "49507431";  // Mensaje original
-
-  // Cifrado
-  char mensajeCifrado[sizeof(mensajeOriginal)];
-  strcpy(mensajeCifrado, mensajeOriginal);
-  dobleCifradoXOR(mensajeCifrado);
-
-  Serial.print("Mensaje cifrado: ");
-  Serial.println(mensajeCifrado);
-
-  // Descifrado
-  char mensajeDescifrado[sizeof(mensajeCifrado)];
-  strcpy(mensajeDescifrado, mensajeCifrado);
-  dobleDescifradoXOR(mensajeDescifrado);
-
-  Serial.print("Mensaje descifrado: ");
-  Serial.println(mensajeDescifrado);
 }
 
 void loop() {

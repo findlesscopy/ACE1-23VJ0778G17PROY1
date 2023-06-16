@@ -6,18 +6,24 @@
 
 #include "Usuarios.h"
 #include "Log.h"
+#include "Cajas.h"
+#include "cifrado.h"
 
 const int EEPROM_SIZE = 4095;
 
+const int BOX_COUNT_ADDRESS = 0;
+const int CURRENT_BOX_ADDRESS = 1 * sizeof(int);
+const int BOX_BLOCK_START_ADDRESS = 2 * sizeof(int);
+const int MAX_BOX = 9;
 
-const int USER_COUNT_ADDRES = 0;
-const int CURRENT_USER_ADDRESS = 1 * sizeof(int);
-const int USER_BLOCK_START_ADDRESS = 2 * sizeof(int);
-const int MAX_USER = 9;
-
-const int LOG_COUNT_ADDRESS = MAX_USER * sizeof(Usuarios) + USER_BLOCK_START_ADDRESS;
+const int LOG_COUNT_ADDRESS = MAX_BOX * sizeof(Cajas) + BOX_BLOCK_START_ADDRESS;
 const int CURRENT_LOG_ADDRESS = 1 * sizeof(int) + LOG_COUNT_ADDRESS;
 const int LOG_BLOCK_START_ADDRESS = 2 * sizeof(int) + LOG_COUNT_ADDRESS;
+const int MAX_LOG = 99;
+
+const int USER_COUNT_ADDRES = MAX_LOG * sizeof(Log) + LOG_BLOCK_START_ADDRESS;
+const int CURRENT_USER_ADDRESS = 1 * sizeof(int) + USER_COUNT_ADDRES;
+const int USER_BLOCK_START_ADDRESS = 2 * sizeof(int) + USER_COUNT_ADDRES;
 
 int get_user_count();
 void set_user_count(int count);
@@ -101,10 +107,30 @@ void reset_eeprom(){
 
     Usuarios admin = Usuarios();
     admin.isAdmin = true;
-    strcpy(admin.nombre, "ADMIN*94069");
-    strcpy(admin.numero, "94069");
-    strcpy(admin.contrasenia, "GRUPO17");
+
+    char nombre[] = "a";// Pruebas solamente "ADMIN*94069"
+    char nombre_cifrado[sizeof(nombre)];
+    strcpy(nombre_cifrado, nombre);
+    dobleCifradoXOR(nombre_cifrado);
+
+    char numero[] = "94069";
+    char numero_cifrado[sizeof(numero)];
+    strcpy(numero_cifrado, numero);
+    dobleCifradoXOR(numero_cifrado);
+
+
+    char contrasenia[] = "1";// Pruebas solamente "GRUPO17"
+    char contrasenia_cifrada[sizeof(contrasenia)];
+    strcpy(contrasenia_cifrada, contrasenia);
+    dobleCifradoXOR(contrasenia_cifrada);
+
+    strcpy(admin.nombre, nombre_cifrado);
+    strcpy(admin.numero, numero_cifrado);
+    strcpy(admin.contrasenia, contrasenia_cifrada);
+    Serial.println(nombre_cifrado);
+    Serial.println(contrasenia_cifrada);
     write_user(admin);
+
 
 
 

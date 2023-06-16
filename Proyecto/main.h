@@ -10,10 +10,13 @@
 #include "matriz.h"
 
 #include "letras.h"
+#include "Usuarios.h"
+#include "eeprom_controller.h"
+#include "funciones_usuario.h"
 
 //  MENUS
-const int SECUENCIA_INICIAL = 0, MENU_PRINCIPAL = 1, LOGIN = 2, REGISTER = 3;
-int menu_actual = SECUENCIA_INICIAL;
+const int SECUENCIA_INICIAL = 0, MENU_PRINCIPAL = 1, LOGIN = 2, REGISTER = 3, ADMIN = 4, CLIENTE = 5;
+int menu_actual = LOGIN;
 
 //  PINES
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
@@ -41,6 +44,10 @@ byte colPins[COLS] = {30, 31, 32};
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
+/* Usuario */
+Usuarios authenticated_user;
+
+int letra_actual_index = 0;
 // FUNCIONES
 void menu_setup();
 void menu_loop();
@@ -53,6 +60,7 @@ void registro();
 
 void letras_matriz();
 void menu_administrar();
+void menu_cliente();
 
 void menu_setup()
 {
@@ -85,10 +93,14 @@ void menu_loop()
     case REGISTER:
         registro();
         break;
-        // TODO:
+
+    case ADMIN:
+        menu_administrar();
         break;
 
-    
+    case CLIENTE:
+        menu_cliente();
+        break;
     default:
         break;
     }
@@ -98,8 +110,8 @@ void secuencia_inicial()
 {
     lcd.clear(); // Borra la pantalla LCD.
 
-    lcd.setCursor(0, 0);             // Establece el cursor en la posición (1, 0) de la pantalla LCD.
-    lcd.print("Bienvenido");         // Imprime el mensaje "Bienvenido" en la pantalla LCD.
+    lcd.setCursor(0, 0);     // Establece el cursor en la posición (1, 0) de la pantalla LCD.
+    lcd.print("Bienvenido"); // Imprime el mensaje "Bienvenido" en la pantalla LCD.
 
     // Imprime diferentes nombres en la pantalla LCD.
     delay(300);          // Pausa de 0.3 segundos
@@ -189,7 +201,7 @@ void menu_principal()
                 num = 2;
             else if (opcion == "0")
                 num = 0;
-            else 
+            else
                 break;
 
             switch (num)
@@ -226,9 +238,10 @@ void menu_principal()
 
 void letras_matriz()
 {
-    lcd.clear();
+    // lcd.clear();
+    lcd.setCursor(0, 0);
     bool exit = false;
-    int letra_actual_index = 0;  // Índice de la letra actual en el arreglo letras[]
+    int letra_actual_index = 0; // Índice de la letra actual en el arreglo letras[]
     String cadena = "";
 
     while (!exit)
@@ -259,16 +272,24 @@ void letras_matriz()
 
             case '0':
                 cadena += letra_actual.name;
-                lcd.clear();  // Limpiar el LCD
-                lcd.setCursor(0, 0);
+                // lcd.clear(); // Limpiar el LCD
+                lcd.setCursor(0, 1);
                 lcd.print(cadena);
-                //delay(1000);  // Esperar un segundo para que se pueda leer la letra en el LCD
+                // delay(1000);  // Esperar un segundo para que se pueda leer la letra en el LCD
                 break;
 
-            case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
                 cadena += key;
-                lcd.clear();  // Limpiar el LCD
-                lcd.setCursor(0, 0);
+                // lcd.clear(); // Limpiar el LCD
+                lcd.setCursor(0, 1);
                 lcd.print(cadena);
                 break;
 
@@ -283,36 +304,258 @@ void letras_matriz()
         // Verificar si se alcanzó el final del arreglo letras[]
         if (letra_actual_index >= sizeof(letras) / sizeof(letras[0]))
         {
-            exit = true;  // Salir del bucle si se alcanzó el final
+            exit = true; // Salir del bucle si se alcanzó el final
         }
+        if (Btn_Ok.is_pressed())
+        {
+            Serial.println(cadena);
+            // return cadena;
+            break;
+        }
+        
     }
 
     limpiar_matriz(matriz);
 }
 
-
-
-
 void login()
 {
-    menu_administrar();
+    lcd.clear(); // Borra la pantalla LCD.
+
+    lcd.setCursor(0, 0);
+    lcd.print("Nombre: ");
+    String nombre = "";
+
+    while (true){
+        // Obtener la letra actual
+        Letras letra_actual = letras[letra_actual_index];
+
+        // Imprimir la letra actual
+        matriz_imprime_caracteres(matriz, letra_actual_index);
+
+        // Esperar a que se presione el botón para cambiar la letra o imprimir la letra actual
+        char key = keypad.getKey();
+        if (key != NO_KEY)
+        {
+            switch (key)
+            {
+            case 'X':
+                letra_actual_index--;
+                if (letra_actual_index < 0)
+                    letra_actual_index = sizeof(letras) / sizeof(letras[0]) - 1;
+                break;
+
+            case '#':
+                letra_actual_index++;
+                if (letra_actual_index >= sizeof(letras) / sizeof(letras[0]))
+                    letra_actual_index = 0;
+                break;
+
+            case '0':
+                nombre += letra_actual.name;
+                
+                break;
+
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                nombre += key;
+                break;
+
+            default:
+                break;
+            }
+            if(nombre.length() < 12){
+                lcd.setCursor(0,1);
+                lcd.print(nombre);
+            }else
+            {
+                lcd.setCursor(0, 1);
+                lcd.print("                ");
+                lcd.setCursor(0, 1);
+                lcd.print("MAX");
+                delay(1000);
+                lcd.setCursor(0, 1);
+                lcd.print("                ");
+                lcd.setCursor(0, 1);
+                lcd.print(nombre);
+            }
+        }
+        if (Btn_Ok.is_pressed())
+        {   
+            Serial.println(nombre);
+            break;
+        }
+        if (Btn_Cancel.is_pressed())
+        {
+            if (nombre.length() > 0)
+            {
+                nombre.remove(nombre.length() - 1);
+                lcd.setCursor(0, 1);
+                lcd.print("                ");
+                lcd.setCursor(0, 1);
+                lcd.print(nombre);
+            }
+        }
+    }
+    Serial.println("Sali del nombre");
+    lcd.clear();
+
+    lcd.setCursor(0, 0);
+    lcd.print("Password:");
+    String password = "";
+    while (true){
+        // Obtener la letra actual
+        Letras letra_actual = letras[letra_actual_index];
+
+        // Imprimir la letra actual
+        matriz_imprime_caracteres(matriz, letra_actual_index);
+
+        // Esperar a que se presione el botón para cambiar la letra o imprimir la letra actual
+        char key = keypad.getKey();
+        if (key != NO_KEY)
+        {
+            switch (key)
+            {
+            case 'X':
+                letra_actual_index--;
+                if (letra_actual_index < 0)
+                    letra_actual_index = sizeof(letras) / sizeof(letras[0]) - 1;
+                break;
+
+            case '#':
+                letra_actual_index++;
+                if (letra_actual_index >= sizeof(letras) / sizeof(letras[0]))
+                    letra_actual_index = 0;
+                break;
+
+            case '0':
+                password += letra_actual.name;
+                
+                break;
+
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                password += key;
+                break;
+
+            default:
+                break;
+            }
+            if(password.length() < 8){
+                lcd.setCursor(0,1);
+                lcd.print(password);
+            }else
+            {
+                lcd.setCursor(0, 1);
+                lcd.print("                ");
+                lcd.setCursor(0, 1);
+                lcd.print("MAX");
+                delay(1000);
+                lcd.setCursor(0, 1);
+                lcd.print("                ");
+                lcd.setCursor(0, 1);
+                lcd.print(password);
+            }
+        }
+        if (Btn_Ok.is_pressed())
+        {   
+            Serial.println(password);
+            break;
+        }
+        if (Btn_Cancel.is_pressed())
+        {
+            if (password.length() > 0)
+            {
+                password.remove(password.length() - 1);
+                lcd.setCursor(0, 1);
+                lcd.print("                ");
+                lcd.setCursor(0, 1);
+                lcd.print(password);
+            }
+        }
+    }
+    char* nombre_char = nombre.c_str();
+    int longitud_nombre = strlen(nombre_char);
+    char nombre_cifrado[longitud_nombre+1];
+    strcpy(nombre_cifrado, nombre_char);
+    dobleCifradoXOR(nombre_cifrado);
+
+    char* password_char = password.c_str();
+    int longitud_password = strlen(password_char);
+    char password_cifrado[longitud_password+1];
+    strcpy(password_cifrado, password_char);
+    dobleCifradoXOR(password_cifrado);
+
+
+    Serial.print("Nombre cifrado: ");
+    Serial.println(nombre_cifrado);
+    Serial.print("Password cifrado: ");
+    Serial.println(password_cifrado);
+
+    Usuarios usuario = login_user(nombre_cifrado, password_cifrado);
+
+    //Serial.println(usuario.is_valid());
+    //Serial.println(usuario.isAdmin);
+    if(usuario.is_valid()){
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Bienvenido");
+        lcd.setCursor(0, 1);
+        lcd.print(usuario.nombre);
+
+        authenticated_user = usuario;
+
+        if(usuario.isAdmin){
+            delay(1000);
+            menu_actual = ADMIN;
+        }else{
+            delay(1000);
+            menu_actual = CLIENTE;
+        }
+    }else
+    {
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Incorrect");
+        lcd.setCursor(0, 1);
+        lcd.print("Credentials");
+        delay(1000);
+    }
 }
 
 void registro()
 {
-    //TODO: 
+    // TODO:
+}
+
+void menu_cliente(){
+    // TODO:
 }
 
 void menu_administrar()
 {
     lcd.clear(); // Borra la pantalla LCD.
 
-    lcd.setCursor(0, 0);         // Establece el cursor en la posición (1, 0) de la pantalla LCD.
+    lcd.setCursor(0, 0);     // Establece el cursor en la posición (1, 0) de la pantalla LCD.
     lcd.print("Menu ADMIN"); // Imprime el mensaje "Bienvenido" en la pantalla LCD.
 
     // Imprime diferentes nombres en la pantalla LCD.
-    delay(300);  
-    lcd.clear(); // Borra la pantalla LCD.        // Pausa de 0.3 segundos
+    delay(300);
+    lcd.clear();         // Borra la pantalla LCD.        // Pausa de 0.3 segundos
     lcd.setCursor(0, 0); // Establece el cursor en la posición (0, 1) de la pantalla LCD.
     lcd.print("1. display de");
     lcd.setCursor(0, 1); // Establece el cursor en la posición (0, 1) de la pantalla LCD.
@@ -363,7 +606,7 @@ void menu_administrar()
                 num = 1;
             else if (opcion == "2")
                 num = 2;
-            else 
+            else
                 break;
 
             switch (num)
