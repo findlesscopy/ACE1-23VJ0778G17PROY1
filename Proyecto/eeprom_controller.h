@@ -9,6 +9,7 @@
 
 const int EEPROM_SIZE = 4095;
 
+
 const int USER_COUNT_ADDRES = 0;
 const int CURRENT_USER_ADDRESS = 1 * sizeof(int);
 const int USER_BLOCK_START_ADDRESS = 2 * sizeof(int);
@@ -22,7 +23,7 @@ int get_user_count();
 void set_user_count(int count);
 int get_current_user_address();
 void write_user (Usuarios user);
-Usuario get_user(int index);
+Usuarios get_user(int index);
 void update_user(Usuarios user);
 bool is_user_registered(String nombre);
 
@@ -39,7 +40,7 @@ void set_user_count(int count) {
     EEPROM.put(USER_COUNT_ADDRES, count);
 }
 
-void get_current_user_address() {
+int get_current_user_address() {
     int address;
     EEPROM.get(CURRENT_USER_ADDRESS, address);
     return address;
