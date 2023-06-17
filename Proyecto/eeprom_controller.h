@@ -2,7 +2,7 @@
 #define EEPROM_CONTROLLER_H
 
 #include <Arduino.h>
-#include <EEPROM.h>
+#include <EEPROM.h>   
 
 #include "Usuarios.h"
 #include "Log.h"
@@ -107,7 +107,6 @@ void reset_eeprom(){
 
     Usuarios admin = Usuarios();
     admin.isAdmin = true;
-
     char nombre[] = "a";// Pruebas solamente "ADMIN*94069"
     char nombre_cifrado[sizeof(nombre)];
     strcpy(nombre_cifrado, nombre);
@@ -117,7 +116,6 @@ void reset_eeprom(){
     char numero_cifrado[sizeof(numero)];
     strcpy(numero_cifrado, numero);
     dobleCifradoXOR(numero_cifrado);
-
 
     char contrasenia[] = "3";// Pruebas solamente "GRUPO17"
     char contrasenia_cifrada[sizeof(contrasenia)];

@@ -16,7 +16,7 @@
 
 //  MENUS
 const int SECUENCIA_INICIAL = 0, MENU_PRINCIPAL = 1, LOGIN = 2, REGISTER = 3, ADMIN = 4, CLIENTE = 5;
-int menu_actual = SECUENCIA_INICIAL;
+int menu_actual = REGISTER;
 
 //  PINES
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
@@ -162,7 +162,7 @@ void menu_principal()
     lcd.print("2. Registro");
 
     delay(200); // Pausa de 0.3 segundos
-//    lcd.clear();
+                //    lcd.clear();
 
     lcd.setCursor(0, 3);
     lcd.print("Opcion:");
@@ -196,16 +196,23 @@ void menu_principal()
         if (Btn_Ok.is_pressed())
         {
             int num;
-            if (opcion == "1"){
+            if (opcion == "1")
+            {
                 menu_actual = LOGIN;
                 break;
-            }else if (opcion == "2"){
+            }
+            else if (opcion == "2")
+            {
                 menu_actual = REGISTER;
                 break;
-            }else if (opcion == "0"){
+            }
+            else if (opcion == "0")
+            {
                 letras_matriz();
                 break;
-            }else{
+            }
+            else
+            {
                 break;
             }
         }
@@ -300,7 +307,6 @@ void letras_matriz()
             // return cadena;
             break;
         }
-        
     }
 
     limpiar_matriz(matriz);
@@ -314,7 +320,8 @@ void login()
     lcd.print("Nombre: ");
     String nombre = "";
 
-    while (true){
+    while (true)
+    {
         // Obtener la letra actual
         Letras letra_actual = letras[letra_actual_index];
 
@@ -341,7 +348,7 @@ void login()
 
             case '0':
                 nombre += letra_actual.name;
-                
+
                 break;
 
             case '1':
@@ -359,10 +366,12 @@ void login()
             default:
                 break;
             }
-            if(nombre.length() < 12){
-                lcd.setCursor(0,1);
+            if (nombre.length() < 12)
+            {
+                lcd.setCursor(0, 1);
                 lcd.print(nombre);
-            }else
+            }
+            else
             {
                 lcd.setCursor(0, 1);
                 lcd.print("                ");
@@ -376,7 +385,7 @@ void login()
             }
         }
         if (Btn_Ok.is_pressed())
-        {   
+        {
             Serial.println(nombre);
             break;
         }
@@ -393,12 +402,13 @@ void login()
         }
     }
     Serial.println("Sali del nombre");
-    //lcd.clear();
+    // lcd.clear();
 
     lcd.setCursor(0, 2);
     lcd.print("Password:");
     String password = "";
-    while (true){
+    while (true)
+    {
         // Obtener la letra actual
         Letras letra_actual = letras[letra_actual_index];
 
@@ -425,7 +435,7 @@ void login()
 
             case '0':
                 password += letra_actual.name;
-                
+
                 break;
 
             case '1':
@@ -443,10 +453,12 @@ void login()
             default:
                 break;
             }
-            if(password.length() < 8){
-                lcd.setCursor(0,3);
+            if (password.length() < 8)
+            {
+                lcd.setCursor(0, 3);
                 lcd.print(password);
-            }else
+            }
+            else
             {
                 lcd.setCursor(0, 3);
                 lcd.print("                ");
@@ -460,7 +472,7 @@ void login()
             }
         }
         if (Btn_Ok.is_pressed())
-        {   
+        {
             Serial.println(password);
             break;
         }
@@ -476,18 +488,17 @@ void login()
             }
         }
     }
-    char* nombre_char = nombre.c_str();
+    char *nombre_char = nombre.c_str();
     int longitud_nombre = strlen(nombre_char);
-    char nombre_cifrado[longitud_nombre+1];
+    char nombre_cifrado[longitud_nombre + 1];
     strcpy(nombre_cifrado, nombre_char);
     dobleCifradoXOR(nombre_cifrado);
 
-    char* password_char = password.c_str();
+    char *password_char = password.c_str();
     int longitud_password = strlen(password_char);
-    char password_cifrado[longitud_password+1];
+    char password_cifrado[longitud_password + 1];
     strcpy(password_cifrado, password_char);
     dobleCifradoXOR(password_cifrado);
-
 
     Serial.print("Nombre cifrado: ");
     Serial.println(nombre_cifrado);
@@ -496,9 +507,10 @@ void login()
 
     Usuarios usuario = login_user(nombre_cifrado, password_cifrado);
 
-    //Serial.println(usuario.is_valid());
-    //Serial.println(usuario.isAdmin);
-    if(usuario.is_valid()){
+    // Serial.println(usuario.is_valid());
+    // Serial.println(usuario.isAdmin);
+    if (usuario.is_valid())
+    {
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("Bienvenido");
@@ -507,14 +519,18 @@ void login()
 
         authenticated_user = usuario;
 
-        if(usuario.isAdmin){
+        if (usuario.isAdmin)
+        {
             delay(1000);
             menu_actual = ADMIN;
-        }else{
+        }
+        else
+        {
             delay(1000);
             menu_actual = CLIENTE;
         }
-    }else
+    }
+    else
     {
         lcd.clear();
         lcd.setCursor(0, 0);
@@ -527,10 +543,368 @@ void login()
 
 void registro()
 {
-    // TODO:
+    lcd.clear(); // Borra la pantalla LCD.
+
+    lcd.setCursor(0, 0);
+    lcd.print("==Registro==");
+    lcd.setCursor(0, 1);
+    lcd.print("Nombre: ");
+    String nombre_registro = "";
+
+    while (true)
+    {
+        // Obtener la letra actual
+        Letras letra_actual = letras[letra_actual_index];
+
+        // Imprimir la letra actual
+        matriz_imprime_caracteres(matriz, letra_actual_index);
+
+        // Esperar a que se presione el botón para cambiar la letra o imprimir la letra actual
+        char key = keypad.getKey();
+        if (key != NO_KEY)
+        {
+            switch (key)
+            {
+            case 'X':
+                letra_actual_index--;
+                if (letra_actual_index < 0)
+                    letra_actual_index = sizeof(letras) / sizeof(letras[0]) - 1;
+                break;
+
+            case '#':
+                letra_actual_index++;
+                if (letra_actual_index >= sizeof(letras) / sizeof(letras[0]))
+                    letra_actual_index = 0;
+                break;
+
+            case '0':
+                nombre_registro += letra_actual.name;
+
+                break;
+
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                nombre_registro += key;
+                break;
+
+            default:
+                break;
+            }
+            if (nombre_registro.length() <= 12)
+            {
+                lcd.setCursor(0, 2);
+                lcd.print(nombre_registro);
+            }
+            else
+            {
+                lcd.setCursor(0, 2);
+                lcd.print("         ");
+                lcd.setCursor(0, 2);
+                lcd.print("MAX");
+                delay(1000);
+                lcd.setCursor(0, 2);
+                lcd.print("         ");
+                lcd.setCursor(0, 2);
+                lcd.print(nombre_registro);
+            }
+        }
+        if (Btn_Ok.is_pressed())
+        {
+            Serial.println(nombre_registro);
+            break;
+        }
+        if (Btn_Cancel.is_pressed())
+        {
+            if (nombre_registro.length() > 0)
+            {
+                nombre_registro.remove(nombre_registro.length() - 1);
+                lcd.setCursor(0, 2);
+                lcd.print("                ");
+                lcd.setCursor(0, 2);
+                lcd.print(nombre_registro);
+            }
+        }
+    }
+
+    lcd.clear(); // Borra la pantalla LCD.
+
+    lcd.setCursor(0, 0);
+    lcd.print("==Registro==");
+    lcd.setCursor(0, 1);
+    lcd.print("Celular: ");
+    String celular_registro = "";
+
+    while (true)
+    {
+        // Obtener la letra actual
+        Letras letra_actual = letras[letra_actual_index];
+
+        // Imprimir la letra actual
+        matriz_imprime_caracteres(matriz, letra_actual_index);
+
+        // Esperar a que se presione el botón para cambiar la letra o imprimir la letra actual
+        char key = keypad.getKey();
+        if (key != NO_KEY)
+        {
+            switch (key)
+            {
+            case 'X':
+                letra_actual_index--;
+                if (letra_actual_index < 0)
+                    letra_actual_index = sizeof(letras) / sizeof(letras[0]) - 1;
+                break;
+
+            case '#':
+                letra_actual_index++;
+                if (letra_actual_index >= sizeof(letras) / sizeof(letras[0]))
+                    letra_actual_index = 0;
+                break;
+
+            case '0':
+                celular_registro += letra_actual.name;
+
+                break;
+
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                celular_registro += key;
+                break;
+
+            default:
+                break;
+            }
+            if (celular_registro.length() <= 8)
+            {
+                lcd.setCursor(0, 2);
+                lcd.print(celular_registro);
+            }
+            else
+            {
+                lcd.setCursor(0, 2);
+                lcd.print("         ");
+                lcd.setCursor(0, 2);
+                lcd.print("MAX");
+                delay(1000);
+                lcd.setCursor(0, 2);
+                lcd.print("         ");
+                lcd.setCursor(0, 2);
+                lcd.print(celular_registro);
+            }
+        }
+        if (Btn_Ok.is_pressed())
+        {
+            Serial.println(celular_registro);
+            break;
+        }
+        if (Btn_Cancel.is_pressed())
+        {
+            if (celular_registro.length() > 0)
+            {
+                celular_registro.remove(celular_registro.length() - 1);
+                lcd.setCursor(0, 2);
+                lcd.print("                ");
+                lcd.setCursor(0, 2);
+                lcd.print(celular_registro);
+            }
+        }
+    }
+
+    lcd.clear(); // Borra la pantalla LCD.
+
+    lcd.setCursor(0, 0);
+    lcd.print("==Registro==");
+    lcd.setCursor(0, 1);
+    lcd.print("Contrasenia: ");
+    String password_registro = "";
+
+    while (true)
+    {
+        // Obtener la letra actual
+        Letras letra_actual = letras[letra_actual_index];
+
+        // Imprimir la letra actual
+        matriz_imprime_caracteres(matriz, letra_actual_index);
+
+        // Esperar a que se presione el botón para cambiar la letra o imprimir la letra actual
+        char key = keypad.getKey();
+        if (key != NO_KEY)
+        {
+            switch (key)
+            {
+            case 'X':
+                letra_actual_index--;
+                if (letra_actual_index < 0)
+                    letra_actual_index = sizeof(letras) / sizeof(letras[0]) - 1;
+                break;
+
+            case '#':
+                letra_actual_index++;
+                if (letra_actual_index >= sizeof(letras) / sizeof(letras[0]))
+                    letra_actual_index = 0;
+                break;
+
+            case '0':
+                password_registro += letra_actual.name;
+
+                break;
+
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                password_registro += key;
+                break;
+
+            default:
+                break;
+            }
+            if (password_registro.length() <= 12)
+            {
+                lcd.setCursor(0, 2);
+                lcd.print(password_registro);
+            }
+            else
+            {
+                lcd.setCursor(0, 2);
+                lcd.print("         ");
+                lcd.setCursor(0, 2);
+                lcd.print("MAX");
+                delay(1000);
+                lcd.setCursor(0, 2);
+                lcd.print("         ");
+                lcd.setCursor(0, 2);
+                lcd.print(password_registro);
+            }
+        }
+        if (Btn_Ok.is_pressed())
+        {
+            Serial.println(password_registro);
+            break;
+        }
+        if (Btn_Cancel.is_pressed())
+        {
+            if (password_registro.length() > 0)
+            {
+                password_registro.remove(password_registro.length() - 1);
+                lcd.setCursor(0, 2);
+                lcd.print("                ");
+                lcd.setCursor(0, 2);
+                lcd.print(password_registro);
+            }
+        }
+    }
+
+    lcd.clear();
+
+    Usuarios usuario = Usuarios();
+
+    char *nombre_char = nombre_registro.c_str();
+    int longitud_nombre = strlen(nombre_char);
+    char nombre_cifrado[longitud_nombre + 1];
+    strcpy(nombre_cifrado, nombre_char);
+    dobleCifradoXOR(nombre_cifrado);
+
+    char *celular_char = celular_registro.c_str();
+    int longitud_celular = strlen(celular_char);
+    char celular_cifrado[longitud_celular + 1];
+    strcpy(celular_cifrado, celular_char);
+    dobleCifradoXOR(celular_cifrado);
+
+    char *password_char = password_registro.c_str();
+    int longitud_password = strlen(password_char);
+    char password_cifrado[longitud_password + 1];
+    strcpy(password_cifrado, password_char);
+    dobleCifradoXOR(password_cifrado);
+
+    strcpy(usuario.nombre, nombre_cifrado);
+    strcpy(usuario.numero, celular_cifrado);
+    strcpy(usuario.contrasenia, password_cifrado);
+    bool error = false;
+
+    if (is_user_registered(nombre_cifrado))
+    {
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("El usuario ya");
+        lcd.setCursor(0, 1);
+        lcd.print("existe :(");
+        error = true;
+        delay(2000);
+    }
+    if (strlen(nombre_cifrado) < 8 || strlen(nombre_cifrado) > 12)
+    {
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("El nombre");
+        lcd.setCursor(0, 1);
+        lcd.print("debe ser de 8 digitos");
+        lcd.setCursor(0, 2);
+        lcd.print("minimo y 12 maximo");
+        error = true;
+        delay(2000);
+    }
+    if (strlen(celular_cifrado) != 8)
+    {
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("El numero debe");
+        lcd.setCursor(0, 1);
+        lcd.print("ser de 8 digitos");
+        error = true;
+        delay(2000);
+    }
+    if (strlen(password_cifrado) < 8 || strlen(password_cifrado) > 12)
+    {
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("La contrasenia");
+        lcd.setCursor(0, 1);
+        lcd.print("debe ser de 8 digitos");
+        lcd.setCursor(0, 2);
+        lcd.print("minimo y 12 maximo");
+        error = true;
+        delay(2000);
+    }
+    if (!error)
+    {
+        usuario.isAdmin = false;
+        strcpy(usuario.nombre, nombre_cifrado);
+        strcpy(usuario.numero, celular_cifrado);
+        strcpy(usuario.contrasenia, password_cifrado);
+        Serial.print("Usuario registrado: ");
+        lcd.clear();
+        lcd.setCursor(0, 1);
+        lcd.print("User Registered");
+
+        delay(1000);
+
+        write_user(usuario);
+    }
+
+    menu_actual = MENU_PRINCIPAL;
 }
 
-void menu_cliente(){
+void menu_cliente()
+{
     // TODO:
 }
 
@@ -543,7 +917,7 @@ void menu_administrar()
 
     // Imprime diferentes nombres en la pantalla LCD.
     delay(300);
-    //lcd.clear();         // Borra la pantalla LCD.        // Pausa de 0.3 segundos
+    // lcd.clear();         // Borra la pantalla LCD.        // Pausa de 0.3 segundos
     lcd.setCursor(0, 1); // Establece el cursor en la posición (0, 1) de la pantalla LCD.
     lcd.print("1. LOGS");
 
@@ -551,9 +925,8 @@ void menu_administrar()
     lcd.setCursor(0, 2);
     lcd.print("2. CHECK STATUS");
 
-
     delay(300); // Pausa de 0.3 segundos
-    //lcd.clear();
+    // lcd.clear();
 
     lcd.setCursor(0, 3);
     lcd.print("Opcion:");
