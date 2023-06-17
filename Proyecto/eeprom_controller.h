@@ -119,7 +119,7 @@ void reset_eeprom(){
     dobleCifradoXOR(numero_cifrado);
 
 
-    char contrasenia[] = "1";// Pruebas solamente "GRUPO17"
+    char contrasenia[] = "3";// Pruebas solamente "GRUPO17"
     char contrasenia_cifrada[sizeof(contrasenia)];
     strcpy(contrasenia_cifrada, contrasenia);
     dobleCifradoXOR(contrasenia_cifrada);
