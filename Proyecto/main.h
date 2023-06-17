@@ -16,7 +16,7 @@
 
 //  MENUS
 const int SECUENCIA_INICIAL = 0, MENU_PRINCIPAL = 1, LOGIN = 2, REGISTER = 3, ADMIN = 4, CLIENTE = 5;
-int menu_actual = REGISTER;
+int menu_actual = LOGIN;
 
 //  PINES
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
@@ -543,6 +543,7 @@ void login()
 
 void registro()
 {
+
     lcd.clear(); // Borra la pantalla LCD.
 
     lcd.setCursor(0, 0);
@@ -893,11 +894,12 @@ void registro()
         Serial.print("Usuario registrado: ");
         lcd.clear();
         lcd.setCursor(0, 1);
-        lcd.print("User Registered");
-
+        lcd.print("Usuario registrado");
         delay(1000);
 
         write_user(usuario);
+        Serial.print("Usuario Registrado: ");
+        Serial.println(get_user_count());
     }
 
     menu_actual = MENU_PRINCIPAL;
@@ -905,7 +907,8 @@ void registro()
 
 void menu_cliente()
 {
-    // TODO:
+   Serial.println("Soy un cliente :)");
+   Serial.println(authenticated_user.nombre);
 }
 
 void menu_administrar()
