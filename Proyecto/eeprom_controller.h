@@ -25,6 +25,7 @@ const int USER_COUNT_ADDRES = MAX_LOG * sizeof(Log) + LOG_BLOCK_START_ADDRESS;
 const int CURRENT_USER_ADDRESS = 1 * sizeof(int) + USER_COUNT_ADDRES;
 const int USER_BLOCK_START_ADDRESS = 2 * sizeof(int) + USER_COUNT_ADDRES;
 
+//Funciones de Usuarios
 int get_user_count();
 void set_user_count(int count);
 int get_current_user_address();
@@ -33,6 +34,55 @@ Usuarios get_user(int index);
 void update_user(Usuarios user);
 bool is_user_registered(String nombre);
 
+//Funciones de Log
+int get_log_count();
+void set_log_count(int count);
+int get_current_log_address();
+void write_log(Log log);
+Log get_log(int index);
+
+// Funciones de Cajas
+int get_box_count();
+void set_box_count(int count);
+int get_current_box_address();
+void write_box(Cajas box);
+Cajas get_box(int index);
+
+//      CAJAS
+int get_box_count() {
+    int count;
+    EEPROM.get(BOX_COUNT_ADDRESS, count);
+    return count;
+}
+
+void set_box_count(int count) {
+    EEPROM.put(BOX_COUNT_ADDRESS, count);
+}
+
+int get_current_box_address() {
+    int address;
+    EEPROM.get(CURRENT_BOX_ADDRESS, address);
+    return address;
+}
+
+void write_box(Cajas box) {
+
+    int box_count = get_box_count();
+
+    if(get_current_box_address() >= EEPROM_SIZE) {
+        Serial.println("No hay espacio en el Sistema 9/9");
+        return;
+    }
+
+    set_box_count(box_count + 1);
+    box.address = get_current_box_address();
+    EEPROM.put(get_current_box_address(), box);
+    EEPROM.put(CURRENT_BOX_ADDRESS, box.address + sizeof(Cajas));
+}
+
+Cajas get_box(int index) {
+    // TODO : No se que parametros van a necesitar
+}
 
 
 //      USUARIOS
@@ -81,7 +131,7 @@ Usuarios get_user(int index) {
 }
 
 void update_user(Usuarios user){
-    EEPROM.put(user.address, user);
+    EEPROM.put(user.address, user);  //PUEDEN USAR ESTA PARA ACTUALIZAR LOS DATOS DE UN USUARIO A 0000000000
 }
 
 bool is_user_registered(String nombre){
@@ -92,6 +142,52 @@ bool is_user_registered(String nombre){
         }
     }
     return false;
+}
+
+// LOGS
+
+int get_log_count(){
+    int count;
+    EEPROM.get(LOG_COUNT_ADDRESS, count);
+    return count;
+}
+
+void set_log_count(int count){
+    EEPROM.put(LOG_COUNT_ADDRESS, count);
+}
+
+int get_current_log_address(){
+    int address;
+    EEPROM.get(CURRENT_LOG_ADDRESS, address);
+    return address;
+}
+
+void write_log(Log log){
+    int log_count = get_log_count();
+
+    if(get_current_log_address() >= EEPROM_SIZE){
+        Serial.println("EEPROM FULL");
+        return;
+    }
+
+    set_log_count(log_count + 1);
+    log.address = get_current_log_address();
+    EEPROM.put(get_current_log_address(), log);
+    EEPROM.put(CURRENT_LOG_ADDRESS, log.address + sizeof(Log));
+}
+
+Log get_log(int index){
+    Log log;
+    
+    if(index < 0 || index >= get_log_count()){
+        Serial.println("Index out of bounds");
+        log = Log();
+        return log;
+    }
+
+    int address = LOG_BLOCK_START_ADDRESS + (index * sizeof(Log));
+    EEPROM.get(address, log);
+    return log;
 }
 
 void reset_eeprom(){
@@ -152,11 +248,6 @@ void reset_eeprom(){
     Serial.println(nombre_cifrado1);
     Serial.println(contrasenia_cifrada1);
     write_user(user1);
-
-
-
-
-
 }
 
 #endif
