@@ -18,7 +18,7 @@
 
 //  MENUS
 const int SECUENCIA_INICIAL = 0, MENU_PRINCIPAL = 1, LOGIN = 2, REGISTER = 3, ADMIN = 4, CLIENTE = 5, ESCOGER_TECLADO = 6, ADMIN_LOGS = 7, ADMIN_STATUS = 8;
-int menu_actual = ADMIN;
+int menu_actual = CLIENTE;
 
 //  PINES
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
@@ -1201,9 +1201,17 @@ void registro()
     menu_actual = MENU_PRINCIPAL;
 }
 
+long int tiempo0 = 0;
 void menu_cliente()
 {
-
+tiempo0 = millis();
+   
+        
+lcd.clear();
+lcd.setCursor(0, 0);     // Establece el cursor en la posici贸n (1, 0) de la pantalla LCD.
+lcd.print("Menu Usuario");
+delay(400);
+lcd.clear();
 lcd.setCursor(0, 0);     // Establece el cursor en la posici贸n (1, 0) de la pantalla LCD.
  lcd.print("1. Ingreso Cel");
  lcd.setCursor(0, 1);     // Establece el cursor en la posici贸n (1, 0) de la pantalla LCD.
@@ -1213,7 +1221,7 @@ lcd.setCursor(0, 0);     // Establece el cursor en la posici贸n (1, 0) de la pa
  lcd.setCursor(0, 3);     // Establece el cursor en la posici贸n (1, 0) de la pantalla LCD.
  lcd.print("4. Eliminar ACC ");
 
-delay(500);
+delay(750);
 lcd.clear();
 
     lcd.setCursor(0, 0);
@@ -1221,7 +1229,10 @@ lcd.clear();
     String opcion = "";
 
     while (true)
-    {
+    {	
+		//Validacion para expirar la sesion de aproximadamente 5 min en tiempo real
+		//4500 tiempo de aproximadamente 10s  a tiempo real en tiempo a proteus es de 300000
+		 if ((millis() - tiempo0) <= 135000) {
         char key = keypad.getKey();
         if (key != NO_KEY)
         {
@@ -1247,6 +1258,7 @@ lcd.clear();
         }
         if (Btn_Ok.is_pressed())
         {
+			//antes del break hay que volver a usar esto "tiempo0 = millis();" para reiniciar el contador
             int num;
             if (opcion == "1")
             {
@@ -1293,9 +1305,14 @@ lcd.clear();
                 lcd.print(opcion);
             }
         }
+		}else{
+		menu_actual = MENU_PRINCIPAL;
+		Serial.println("Tiempo de sesion expirado");
+		break;
+		}
     }
 
-
+	
 }
 
 void menu_administrar()
