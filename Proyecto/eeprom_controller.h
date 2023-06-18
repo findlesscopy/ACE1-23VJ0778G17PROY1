@@ -248,6 +248,15 @@ void reset_eeprom(){
     Serial.println(nombre_cifrado1);
     Serial.println(contrasenia_cifrada1);
     write_user(user1);
+
+    Log log = Log();
+    log.id = 1;
+    strcpy(log.descripcion, "INCIOADMIN");
+    write_log(log);
+
+    log.id = 2;
+    strcpy(log.descripcion, "INCIOUSER");
+    write_log(log);
 }
 
 #endif

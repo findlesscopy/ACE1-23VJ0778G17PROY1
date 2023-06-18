@@ -86,7 +86,7 @@ void login();
 void registro();
 void admin_logs();
 void admin_status();
-
+void loop_logs();
 void letras_matriz();
 void menu_administrar();
 void menu_cliente();
@@ -1279,7 +1279,60 @@ void menu_administrar()
 }
 
 void admin_logs(){
-    Serial.println("Ver los logs");
+    lcd.clear(); // Borra la pantalla LCD.
+
+    lcd.setCursor(0, 0);     // Establece el cursor en la posición (1, 0) de la pantalla LCD.
+    lcd.print("Ver los Logs"); // Imprime el mensaje "Bienvenido" en la pantalla LCD.
+    lcd.setCursor(0, 1);
+    lcd.print("Presiona Ok");
+    lcd.setCursor(0, 2);
+    lcd.print("para inciciar");
+
+    while(true){
+        if(Btn_Ok.is_pressed()){
+            
+            loop_logs();
+            break;
+        }
+        if(Btn_Cancel.is_pressed()){
+            break;
+        }
+    }
+    // Imprime diferentes nombres en la pantalla LCD.
+    delay(300);
+}
+
+void loop_logs(){
+    lcd.clear();
+    int current_log_index = 0;
+    bool exit = false;
+    Log current_log = get_log(current_log_index);
+
+    while(!exit){
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("===== LOGS =====");
+        lcd.setCursor(0, 1);
+        lcd.print(String(current_log.id));
+        lcd.setCursor(0, 2);
+        lcd.print(String(current_log.descripcion));
+
+        while(true){
+            if(Btn_Ok.is_pressed()){
+                current_log_index++;
+                if(current_log_index >= get_log_count()){
+                    current_log_index = 0;
+                }
+                lcd.clear();
+                current_log = get_log(current_log_index);
+                break;
+            }
+            if(Btn_Cancel.is_pressed()){
+                exit = true;
+                break;
+            }
+        }
+    }
 }
 
 void admin_status(){
