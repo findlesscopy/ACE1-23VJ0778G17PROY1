@@ -17,8 +17,8 @@
 #define LOOP while(true)
 
 //  MENUS
-const int SECUENCIA_INICIAL = 0, MENU_PRINCIPAL = 1, LOGIN = 2, REGISTER = 3, ADMIN = 4, CLIENTE = 5, ESCOGER_TECLADO = 6;
-int menu_actual = SECUENCIA_INICIAL;
+const int SECUENCIA_INICIAL = 0, MENU_PRINCIPAL = 1, LOGIN = 2, REGISTER = 3, ADMIN = 4, CLIENTE = 5, ESCOGER_TECLADO = 6, ADMIN_LOGS = 7, ADMIN_STATUS = 8;
+int menu_actual = ADMIN;
 
 //  PINES
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
@@ -84,6 +84,8 @@ void secuencia_inicial();
 void menu_principal();
 void login();
 void registro();
+void admin_logs();
+void admin_status();
 
 void letras_matriz();
 void menu_administrar();
@@ -132,6 +134,14 @@ void menu_loop()
 
     case CLIENTE:
         menu_cliente();
+        break;
+
+    case ADMIN_LOGS:
+        admin_logs();
+        break;
+
+    case ADMIN_STATUS:
+        admin_status();
         break;
 
     default:
@@ -1221,44 +1231,37 @@ void menu_administrar()
             if (opcion2.length() < 2)
             {
                 opcion2 += key;
-                lcd.setCursor(10, 3);
+                lcd.setCursor(12, 3);
                 lcd.print(opcion2);
             }
             else
             {
-                lcd.setCursor(0, 1);
+                lcd.setCursor(12, 3);
                 lcd.print("                ");
-                lcd.setCursor(0, 1);
+                lcd.setCursor(12, 3);
                 lcd.print("MAX");
                 delay(1000);
-                lcd.setCursor(0, 1);
+                lcd.setCursor(12, 3);
                 lcd.print("                ");
-                lcd.setCursor(0, 1);
+                lcd.setCursor(12, 3);
                 lcd.print(opcion2);
             }
         }
         if (Btn_Ok.is_pressed())
         {
             int num;
-            if (opcion2 == "1")
-                num = 1;
-            else if (opcion2 == "2")
-                num = 2;
-            else
-                break;
-
-            switch (num)
-            {
-            case 1:
-                secuencia_inicial();
-                break;
-
-            case 2:
-                menu_principal();
-                break;
-            default:
+            if (opcion2 == "1"){
+                menu_actual = ADMIN_LOGS;
                 break;
             }
+            else if (opcion2 == "2"){
+                menu_actual = ADMIN_STATUS;
+                break;
+            }
+            else{
+                break;
+            }
+             
         }
 
         if (Btn_Cancel.is_pressed())
@@ -1274,4 +1277,13 @@ void menu_administrar()
         }
     }
 }
+
+void admin_logs(){
+    Serial.println("Ver los logs");
+}
+
+void admin_status(){
+    Serial.println("Ver el status");
+}
+
 #endif
