@@ -30,6 +30,15 @@ LedControl matriz(din, clk, cs, 1);
 // BOTONES
 Button Btn_Ok(23);
 Button Btn_Cancel(24);
+Button Btn_Compa1(45);
+Button Btn_Compa2(46);
+Button Btn_Compa3(47);
+Button Btn_Compa4(48);
+Button Btn_Compa5(49);
+Button Btn_Compa6(50);
+Button Btn_Compa7(51);
+Button Btn_Compa8(52);
+Button Btn_Compa9(53);
 
 //Estado menus ingresos
 
@@ -1194,8 +1203,99 @@ void registro()
 
 void menu_cliente()
 {
-   Serial.println("Soy un cliente :)");
-   Serial.println(authenticated_user.nombre);
+
+lcd.setCursor(0, 0);     // Establece el cursor en la posici贸n (1, 0) de la pantalla LCD.
+ lcd.print("1. Ingreso Cel");
+ lcd.setCursor(0, 1);     // Establece el cursor en la posici贸n (1, 0) de la pantalla LCD.
+ lcd.print("2. Retiro Cel ");
+ lcd.setCursor(0, 2);     // Establece el cursor en la posici贸n (1, 0) de la pantalla LCD.
+ lcd.print("3. Cerrar Sesion ");
+ lcd.setCursor(0, 3);     // Establece el cursor en la posici贸n (1, 0) de la pantalla LCD.
+ lcd.print("4. Eliminar ACC ");
+
+delay(500);
+lcd.clear();
+
+    lcd.setCursor(0, 0);
+    lcd.print("Opcion:");
+    String opcion = "";
+
+    while (true)
+    {
+        char key = keypad.getKey();
+        if (key != NO_KEY)
+        {
+
+            if (opcion.length() < 2)
+            {
+                opcion += key;
+                lcd.setCursor(12, 0);
+                lcd.print(opcion);
+            }
+            else
+            {
+                lcd.setCursor(12, 0);
+                lcd.print("      ");
+                lcd.setCursor(12, 0);
+                lcd.print("MAX");
+                delay(100);
+                lcd.setCursor(12, 0);
+                lcd.print("      ");
+                lcd.setCursor(12, 0);
+                lcd.print(opcion);
+            }
+        }
+        if (Btn_Ok.is_pressed())
+        {
+            int num;
+            if (opcion == "1")
+            {
+                menu_actual = MENU_PRINCIPAL;
+                // Ingresar telefonos
+                Serial.println("Opcion ingresar telefonos");
+                break;
+            }
+            else if (opcion == "2")
+            {
+                menu_actual = MENU_PRINCIPAL;
+                // Retirar Telefonos
+                Serial.println("Opcion Retirar telefonos");
+                break;
+            }
+            else if (opcion == "3")
+            {
+                menu_actual = MENU_PRINCIPAL;
+                // Cerrar Sesion
+                Serial.println("Opcion 3 Cerrar sesion");
+                break;
+                
+            }else if (opcion == "4"){
+                Serial.println("Opcion eliminar cuenta");
+                menu_actual = MENU_PRINCIPAL;
+                // Borrar cuenta
+                break;
+                
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        if (Btn_Cancel.is_pressed())
+        {
+            if (opcion.length() > 0)
+            {
+                opcion.remove(opcion.length() - 1);
+                lcd.setCursor(0, 1);
+                lcd.print("                ");
+                lcd.setCursor(0, 1);
+                lcd.print(opcion);
+            }
+        }
+    }
+
+
 }
 
 void menu_administrar()
