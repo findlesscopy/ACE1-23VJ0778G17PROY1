@@ -7,7 +7,6 @@
         - José Manuel Ibarra Pirir 202001800
         - César André Ramírez Dávila 202010816
         - Ángel Francisco Sique Santos 202012039
-        - Primo de Angel Ad Honorem
 */
 
 #include "main.h"
