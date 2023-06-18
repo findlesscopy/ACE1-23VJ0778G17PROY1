@@ -354,6 +354,7 @@ void menu_seleccionar_teclado()
                 Serial.println(APLICACION_ACTIVA);
                 Serial.print("Key");
                 Serial.println(KEYPAD_ACTIVO);
+                salir = true;
                 break;
             default:
                 break;
@@ -657,72 +658,75 @@ void login()
 
     //lcd.setCursor(0, 2);
     lcd.setCursor(0, 0);
-    lcd.print("Password:");
     String password = "";
-    while (true)
-    {
-        // Obtener la letra actual
-        Letras letra_actual = letras[letra_actual_index];
+  while (true) {
 
-        // Imprimir la letra actual
-        matriz_imprime_caracteres(matriz, letra_actual_index);
+    if (KEYPAD_ACTIVO && !APLICACION_ACTIVA) {
+      // Obtener la letra actual
+      Letras letra_actual = letras[letra_actual_index];
 
-        // Esperar a que se presione el botón para cambiar la letra o imprimir la letra actual
-        char key = keypad.getKey();
-        if (key != NO_KEY)
-        {
-            switch (key)
-            {
-            case 'X':
-                letra_actual_index--;
-                if (letra_actual_index < 0)
-                    letra_actual_index = sizeof(letras) / sizeof(letras[0]) - 1;
-                break;
+      // Imprimir la letra actual
+      matriz_imprime_caracteres(matriz, letra_actual_index);
 
-            case '#':
-                letra_actual_index++;
-                if (letra_actual_index >= sizeof(letras) / sizeof(letras[0]))
-                    letra_actual_index = 0;
-                break;
+      // Esperar a que se presione el botón para cambiar la letra o imprimir la letra actual
+      char key = keypad.getKey();
+      if (key != NO_KEY) {
+        switch (key) {
+          case 'X':
+            letra_actual_index--;
+            if (letra_actual_index < 0)
+              letra_actual_index = sizeof(letras) / sizeof(letras[0]) - 1;
+            break;
 
-            case '0':
-                password += letra_actual.name;
+          case '#':
+            letra_actual_index++;
+            if (letra_actual_index >= sizeof(letras) / sizeof(letras[0]))
+              letra_actual_index = 0;
+            break;
 
-                break;
+          case '0':
+            password += letra_actual.name;
 
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                password += key;
-                break;
+            break;
 
-            default:
-                break;
-            }
-            if (password.length() < 8)
-            {
-                lcd.setCursor(0, 3);
-                lcd.print(password);
-            }
-            else
-            {
-                lcd.setCursor(0, 3);
-                lcd.print("                ");
-                lcd.setCursor(0, 3);
-                lcd.print("MAX");
-                delay(1000);
-                lcd.setCursor(0, 3);
-                lcd.print("                ");
-                lcd.setCursor(0, 3);
-                lcd.print(password);
-            }
+          case '1':
+          case '2':
+          case '3':
+          case '4':
+          case '5':
+          case '6':
+          case '7':
+          case '8':
+          case '9':
+            password += key;
+            break;
+
+          default:
+            break;
         }
+
+        if (password.length() < 8) {
+          lcd.setCursor(0, 1);
+          lcd.print(password);
+        } else {
+          lcd.setCursor(0, 1);
+          lcd.print("                ");
+          lcd.setCursor(0, 1);
+          lcd.print("MAX");
+          delay(1000);
+          lcd.setCursor(0, 1);
+          lcd.print("                ");
+          lcd.setCursor(0, 1);
+          lcd.print(password);
+        }
+      }
+    } else if (!KEYPAD_ACTIVO && APLICACION_ACTIVA && !ya_entro) {
+      Serial.println("App");
+      password = recibir_texto_app("Password", "LOGIN");
+      lcd.setCursor(0, 3);
+      lcd.print(password);
+      ya_entro = true;
+    }
         if (Btn_Ok.is_pressed())
         {
             Serial.println(password);
