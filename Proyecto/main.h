@@ -14,9 +14,11 @@
 #include "eeprom_controller.h"
 #include "funciones_usuario.h"
 
+#define LOOP while(true)
+
 //  MENUS
-const int SECUENCIA_INICIAL = 0, MENU_PRINCIPAL = 1, LOGIN = 2, REGISTER = 3, ADMIN = 4, CLIENTE = 5;
-int menu_actual = LOGIN;
+const int SECUENCIA_INICIAL = 0, MENU_PRINCIPAL = 1, LOGIN = 2, REGISTER = 3, ADMIN = 4, CLIENTE = 5, ESCOGER_TECLADO = 6;
+int menu_actual = SECUENCIA_INICIAL;
 
 //  PINES
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
@@ -43,6 +45,25 @@ byte rowPins[ROWS] = {26, 27, 28, 29};
 byte colPins[COLS] = {30, 31, 32};
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+bool APLICACION_ACTIVA = false;
+bool KEYPAD_ACTIVO = false;
+
+// ----------- VARIABLES APP ---------- //
+char nombre_temp[11];
+boolean entradaAceptada() {
+    LOOP {
+        if (digitalRead(4)) {
+	    delay(210);
+	    return true;
+	}
+        if (digitalRead(3)) {
+	    delay(210);
+	    return false;
+	}
+    }
+} 
+#define LINEA_VACIA "                "
+String recibir_texto_app(char* mensaje, char* titulo);
 
 /* Usuario */
 Usuarios authenticated_user;
@@ -51,6 +72,8 @@ int letra_actual_index = 0;
 // FUNCIONES
 void menu_setup();
 void menu_loop();
+void conectar_dispositivo();
+void limpiarBuffer();
 
 // *MENUS
 void secuencia_inicial();
@@ -107,6 +130,20 @@ void menu_loop()
     }
 }
 
+
+void enviarConfirmar(char* cadena) {
+    Serial1.println(cadena);
+    bool hayAlgo = false;
+    char recibidos[3];
+    LOOP {
+        while(Serial1.available()) {
+	    Serial1.readBytes(recibidos, 2);
+            hayAlgo = true;
+        }
+        if (hayAlgo && !Serial1.available()) break;
+    }
+}
+
 void secuencia_inicial()
 {
     lcd.clear(); // Borra la pantalla LCD.
@@ -144,6 +181,205 @@ void secuencia_inicial()
         }
     }
 }
+
+void limpiarBuffer() {
+    int t0 = millis();
+    int t1 = millis();
+    LOOP {
+        t1 = millis();
+        while(Serial1.available()) {
+	    Serial1.read();
+        }
+        if ((t1 - t0 >= 1000) && !Serial1.available()) break;
+    }
+}
+
+void conectar_dispositivo()
+{
+  limpiarBuffer();
+  lcd.clear();
+  lcd.print(" Esperando  una ");
+  lcd.setCursor(0, 1);
+  lcd.print("   conexion...  ");
+  bool alguienPorAhi = false;
+        char recibidos[3];
+   LOOP {
+	        while(Serial1.available()) {
+		    Serial1.readBytes(recibidos, 2);
+		    alguienPorAhi = true;
+		}
+		if (alguienPorAhi && !Serial1.available()) break;
+  }     
+  limpiarBuffer();
+  lcd.clear();
+  lcd.print("Conectado con exito");
+  delay(1000);
+  lcd.clear();
+  Serial.println("Final de conectar");
+}
+
+String recibir_texto_app(char* mensaje, char* titulo)
+{
+  bool termino = false;
+  LOOP {
+            
+    Serial.println("Entro a loop nombre");
+    if(termino)
+    {
+      break;
+    }
+    termino = true;
+    limpiarBuffer();
+    enviarConfirmar(mensaje);
+    memset(nombre_temp, 0, 11);    
+    lcd.clear();
+    lcd.print(titulo);
+    lcd.setCursor(0, 1);
+    lcd.print(" - ");
+    lcd.print(mensaje);
+    lcd.print(":");
+    lcd.println("");
+    lcd.setCursor(0, 2);
+    // OBTENER CADENA DE APLICACIÓN -- Nombre
+    bool seEnvioAlgo = false;
+    int indiceNombre = 0;
+    long int t0 = millis();
+    long int t1 = millis();
+    limpiarBuffer();
+
+    LOOP {
+        // SI YA SE ENVIO ALGO DESDE LA APLICACION
+        while (Serial1.available()) {
+            seEnvioAlgo = true;
+        //   RECIBIRLO
+            nombre_temp[indiceNombre++] = Serial1.read();
+
+            Serial.println(nombre_temp);
+            Serial.println("Entro a en enviado algo");
+
+        }
+        // CONTROLAR CUANTO HA PASADO DESDE QUE COME...
+        if (seEnvioAlgo) {
+            t1 = millis();
+            if (t1 - t0 >= 500) break;
+        } else {
+            t0 = millis();
+            t1 = millis();
+        }
+    }
+  }
+  Serial.print("Dato obtenido de app");
+  return nombre_temp;
+}
+
+
+void menu_seleccionar_teclado()
+{
+    lcd.clear(); // Borrar pantalla LCD
+
+    lcd.setCursor(0, 0);
+    lcd.print("Entrada:"); // Imprime el mensaje 
+
+    // Imprime diferentes nombres en la pantalla LCD.
+    delay(300);          // Pausa de 0.3 segundos
+    lcd.setCursor(0, 1); // Establece el cursor en la posición (0, 1) de la pantalla LCD.
+    lcd.print("1. Aplicacion");
+
+    delay(300); // Pausa de 0.3 segundos
+    lcd.setCursor(0, 2);
+    lcd.print("2. KeyPad");
+
+    delay(300); // Pausa de 0.3 segundos
+    lcd.clear();
+
+    lcd.setCursor(0, 0);
+    lcd.print("Opcion:");
+    String opcion = "";
+
+    bool salir = false; // Se completo el ciclo y tiene que salir
+    while (true)
+    {
+        char key = keypad.getKey();
+        if (key != NO_KEY)
+        {
+
+            if (opcion.length() < 2)
+            {
+                opcion += key;
+                lcd.setCursor(0, 1);
+                lcd.print(opcion);
+            }
+            else
+            {
+                lcd.setCursor(0, 1);
+                lcd.print("                ");
+                lcd.setCursor(0, 1);
+                lcd.print("MAX");
+                delay(1000);
+                lcd.setCursor(0, 1);
+                lcd.print("                ");
+                lcd.setCursor(0, 1);
+                lcd.print(opcion);
+            }
+        }
+        if (Btn_Ok.is_pressed())
+        {
+            int num;
+            if (opcion == "1")
+                num = 1;
+            else if (opcion == "2")
+                num = 2;
+            else
+                break;
+
+            switch (num)
+            {
+
+            case 1:
+                APLICACION_ACTIVA = true;
+                KEYPAD_ACTIVO = false;
+                Serial.println("1");
+                Serial.print("APP");
+                Serial.println(APLICACION_ACTIVA);
+                Serial.print("Key");
+                Serial.println(KEYPAD_ACTIVO);
+                conectar_dispositivo();
+                salir = true;
+                break;
+            case 2:
+                APLICACION_ACTIVA = false;
+                KEYPAD_ACTIVO = true;
+                Serial.println("2");
+                Serial.print("APP");
+                Serial.println(APLICACION_ACTIVA);
+                Serial.print("Key");
+                Serial.println(KEYPAD_ACTIVO);
+                break;
+            default:
+                break;
+            }
+        }
+
+        if (Btn_Cancel.is_pressed())
+        {
+            if (opcion.length() > 0)
+            {
+                opcion.remove(opcion.length() - 1);
+                lcd.setCursor(0, 1);
+                lcd.print("                ");
+                lcd.setCursor(0, 1);
+                lcd.print(opcion);
+            }
+        }
+
+        if(salir)
+        {
+          break;
+        }
+    }
+}
+
+
 
 void menu_principal()
 {
@@ -314,14 +550,18 @@ void letras_matriz()
 
 void login()
 {
+  menu_seleccionar_teclado();
     lcd.clear(); // Borra la pantalla LCD.
 
     lcd.setCursor(0, 0);
-    lcd.print("Nombre: ");
+    //lcd.print("Nombre: ");
+    bool ya_entro = false;
     String nombre = "";
 
     while (true)
     {
+        if(KEYPAD_ACTIVO && !APLICACION_ACTIVA) 
+        {  
         // Obtener la letra actual
         Letras letra_actual = letras[letra_actual_index];
 
@@ -384,6 +624,17 @@ void login()
                 lcd.print(nombre);
             }
         }
+      } 
+
+      else if(!KEYPAD_ACTIVO && APLICACION_ACTIVA && !ya_entro) 
+        {
+          Serial.println("App");
+          nombre = recibir_texto_app("Nombre", "LOGIN");
+          lcd.setCursor(0,3);
+          lcd.print(nombre);
+          ya_entro = true;
+        }
+
         if (Btn_Ok.is_pressed())
         {
             Serial.println(nombre);
@@ -402,9 +653,10 @@ void login()
         }
     }
     Serial.println("Sali del nombre");
-    // lcd.clear();
+    lcd.clear();
 
-    lcd.setCursor(0, 2);
+    //lcd.setCursor(0, 2);
+    lcd.setCursor(0, 0);
     lcd.print("Password:");
     String password = "";
     while (true)
