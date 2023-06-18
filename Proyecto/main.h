@@ -31,6 +31,10 @@ LedControl matriz(din, clk, cs, 1);
 Button Btn_Ok(23);
 Button Btn_Cancel(24);
 
+//Estado menus ingresos
+
+int menu_ingresos = 0; // 0 = login ;1 = register; 2 = ingreso telefono 
+
 // ------------------ Keypad ------------------ //
 const byte ROWS = 4;
 const byte COLS = 3;
@@ -84,6 +88,7 @@ void registro();
 void letras_matriz();
 void menu_administrar();
 void menu_cliente();
+void menu_seleccionar_teclado(int menu_ingresos);
 
 void menu_setup()
 {
@@ -107,6 +112,10 @@ void menu_loop()
 
     case MENU_PRINCIPAL:
         menu_principal();
+        break;
+
+    case ESCOGER_TECLADO:
+        menu_seleccionar_teclado(menu_ingresos);
         break;
 
     case LOGIN:
@@ -273,7 +282,7 @@ String recibir_texto_app(char* mensaje, char* titulo)
 }
 
 
-void menu_seleccionar_teclado()
+void menu_seleccionar_teclado(int estado_menu_ingresos)
 {
     lcd.clear(); // Borrar pantalla LCD
 
@@ -290,9 +299,9 @@ void menu_seleccionar_teclado()
     lcd.print("2. KeyPad");
 
     delay(300); // Pausa de 0.3 segundos
-    lcd.clear();
+    //lcd.clear();
 
-    lcd.setCursor(0, 0);
+    lcd.setCursor(0, 3);
     lcd.print("Opcion:");
     String opcion = "";
 
@@ -306,36 +315,26 @@ void menu_seleccionar_teclado()
             if (opcion.length() < 2)
             {
                 opcion += key;
-                lcd.setCursor(0, 1);
+                lcd.setCursor(12, 3);
                 lcd.print(opcion);
             }
             else
             {
-                lcd.setCursor(0, 1);
+                lcd.setCursor(12, 3);
                 lcd.print("                ");
-                lcd.setCursor(0, 1);
+                lcd.setCursor(12, 3);
                 lcd.print("MAX");
                 delay(1000);
-                lcd.setCursor(0, 1);
+                lcd.setCursor(12, 3);
                 lcd.print("                ");
-                lcd.setCursor(0, 1);
+                lcd.setCursor(12, 3);
                 lcd.print(opcion);
             }
         }
         if (Btn_Ok.is_pressed())
         {
             int num;
-            if (opcion == "1")
-                num = 1;
-            else if (opcion == "2")
-                num = 2;
-            else
-                break;
-
-            switch (num)
-            {
-
-            case 1:
+            if (opcion == "1"){
                 APLICACION_ACTIVA = true;
                 KEYPAD_ACTIVO = false;
                 Serial.println("1");
@@ -345,8 +344,9 @@ void menu_seleccionar_teclado()
                 Serial.println(KEYPAD_ACTIVO);
                 conectar_dispositivo();
                 salir = true;
-                break;
-            case 2:
+            }
+            else if (opcion == "2")
+            {
                 APLICACION_ACTIVA = false;
                 KEYPAD_ACTIVO = true;
                 Serial.println("2");
@@ -354,11 +354,27 @@ void menu_seleccionar_teclado()
                 Serial.println(APLICACION_ACTIVA);
                 Serial.print("Key");
                 Serial.println(KEYPAD_ACTIVO);
+                switch (estado_menu_ingresos)
+                {
+                case 0:
+                    menu_actual = LOGIN;
+                    break;
+                case 1:
+                    menu_actual = REGISTER;
+                    break;
+                case 2:
+                    menu_actual = MENU_PRINCIPAL;
+                    //TODO INGRESO CELULAR
+                    break;
+                default:
+                    break;
+                }
                 salir = true;
-                break;
-            default:
-                break;
             }
+            else{
+                 break;
+            }
+               
         }
 
         if (Btn_Cancel.is_pressed())
@@ -435,12 +451,16 @@ void menu_principal()
             int num;
             if (opcion == "1")
             {
-                menu_actual = LOGIN;
+                menu_actual = ESCOGER_TECLADO;
+                menu_ingresos = 0;
+                //menu_actual = LOGIN;
                 break;
             }
             else if (opcion == "2")
             {
-                menu_actual = REGISTER;
+                menu_actual = ESCOGER_TECLADO;
+                menu_ingresos = 1;
+                //menu_actual = REGISTER;
                 break;
             }
             else if (opcion == "0")
@@ -551,11 +571,11 @@ void letras_matriz()
 
 void login()
 {
-  menu_seleccionar_teclado();
+  //menu_seleccionar_teclado();
     lcd.clear(); // Borra la pantalla LCD.
 
     lcd.setCursor(0, 0);
-    //lcd.print("Nombre: ");
+    lcd.print("Nombre: ");
     bool ya_entro = false;
     String nombre = "";
 
@@ -654,10 +674,11 @@ void login()
         }
     }
     Serial.println("Sali del nombre");
-    lcd.clear();
+    //lcd.clear();
 
-    //lcd.setCursor(0, 2);
-    lcd.setCursor(0, 0);
+    lcd.setCursor(0, 2);
+    lcd.print("Password: ");
+    //lcd.setCursor(0, 0);
     String password = "";
   while (true) {
 
@@ -706,17 +727,17 @@ void login()
         }
 
         if (password.length() < 8) {
-          lcd.setCursor(0, 1);
+          lcd.setCursor(0, 3);
           lcd.print(password);
         } else {
-          lcd.setCursor(0, 1);
+          lcd.setCursor(0, 3);
           lcd.print("                ");
-          lcd.setCursor(0, 1);
+          lcd.setCursor(0, 3);
           lcd.print("MAX");
           delay(1000);
-          lcd.setCursor(0, 1);
+          lcd.setCursor(0, 3);
           lcd.print("                ");
-          lcd.setCursor(0, 1);
+          lcd.setCursor(0, 3);
           lcd.print(password);
         }
       }
