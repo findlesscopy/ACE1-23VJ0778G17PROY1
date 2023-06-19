@@ -882,8 +882,13 @@ void login()
         {
             log_generado = Log();
             log_generado.id = contador_logs++;
-            strcpy(log_generado.descripcion, "INICIOADMIN");
+            char descripcion[] = "INICIOADMIN";
+            char descripcion_cifrado[sizeof(descripcion)];
+            strcpy(descripcion_cifrado, descripcion);
+            dobleCifradoXOR(descripcion_cifrado);
+            strcpy(log_generado.descripcion, descripcion_cifrado);
             write_log(log_generado);
+
             delay(1000);
             menu_actual = ADMIN;
         }
@@ -891,8 +896,13 @@ void login()
         {
             log_generado = Log();
             log_generado.id = contador_logs++;
-            strcpy(log_generado.descripcion, "INICIOSESION");
+            char descripcion[] = "INICIOSESION";
+            char descripcion_cifrado[sizeof(descripcion)];
+            strcpy(descripcion_cifrado, descripcion);
+            dobleCifradoXOR(descripcion_cifrado);
+            strcpy(log_generado.descripcion, descripcion_cifrado);
             write_log(log_generado);
+
             delay(1000);
             menu_actual = CLIENTE;
         }
@@ -905,10 +915,16 @@ void login()
             lcd.print("Incorrect");
             lcd.setCursor(0, 1);
             lcd.print("Credentials");
+
             log_generado = Log();
             log_generado.id = contador_logs++;
-            strcpy(log_generado.descripcion, "FALLOSESION");
+            char descripcion[] = "FALLOSESION";
+            char descripcion_cifrado[sizeof(descripcion)];
+            strcpy(descripcion_cifrado, descripcion);
+            dobleCifradoXOR(descripcion_cifrado);
+            strcpy(log_generado.descripcion, descripcion_cifrado);
             write_log(log_generado);
+
             delay(10000);
             intentos_fallidos_login = 0;
 
@@ -919,10 +935,16 @@ void login()
         lcd.print("Incorrect");
         lcd.setCursor(0, 1);
         lcd.print("Credentials");
+
         log_generado = Log();
         log_generado.id = contador_logs++;
-        strcpy(log_generado.descripcion, "FALLOSESION");
+        char descripcion[] = "FALLOSESION";
+        char descripcion_cifrado[sizeof(descripcion)];
+        strcpy(descripcion_cifrado, descripcion);
+        dobleCifradoXOR(descripcion_cifrado);
+        strcpy(log_generado.descripcion, descripcion_cifrado);
         write_log(log_generado);
+
         intentos_fallidos_login_globales++;
         intentos_fallidos_login++;
         delay(1000);
@@ -1372,7 +1394,11 @@ void menu_cliente()
                 {
                     log_generado = Log();
                     log_generado.id = contador_logs++;
-                    strcpy(log_generado.descripcion, "SESIONCERRADA");
+                    char descripcion[] = "SESIONCERRADA";
+                    char descripcion_cifrado[sizeof(descripcion)];
+                    strcpy(descripcion_cifrado, descripcion);
+                    dobleCifradoXOR(descripcion_cifrado);
+                    strcpy(log_generado.descripcion, descripcion_cifrado);
                     write_log(log_generado);
 
                     menu_actual = MENU_PRINCIPAL;
@@ -1480,7 +1506,11 @@ void menu_administrar()
             {
                 log_generado = Log();
                 log_generado.id = contador_logs++;
-                strcpy(log_generado.descripcion, "SESIONCERRADA");
+                char descripcion[] = "SESIONCERRADA";
+                char descripcion_cifrado[sizeof(descripcion)];
+                strcpy(descripcion_cifrado, descripcion);
+                dobleCifradoXOR(descripcion_cifrado);
+                strcpy(log_generado.descripcion, descripcion_cifrado);
                 write_log(log_generado);
                 menu_actual = MENU_PRINCIPAL;
                 break;
@@ -1548,7 +1578,9 @@ void loop_logs()
         lcd.setCursor(0, 1);
         lcd.print(String(current_log.id));
         lcd.setCursor(0, 2);
-        lcd.print(String(current_log.descripcion));
+        char *descripcion_char = current_log.descripcion;
+        dobleDescifradoXOR(descripcion_char);
+        lcd.print(String(descripcion_char));
 
         while (true)
         {
@@ -1835,7 +1867,11 @@ void ingreso_celular()
 
         log_generado = Log();
         log_generado.id = contador_logs++;
-        strcpy(log_generado.descripcion, "INGRESOCEL");
+        char descripcion[] = "INGRESOCEL";
+        char descripcion_cifrado[sizeof(descripcion)];
+        strcpy(descripcion_cifrado, descripcion);
+        dobleCifradoXOR(descripcion_cifrado);
+        strcpy(log_generado.descripcion, descripcion_cifrado);
         write_log(log_generado);
 
         lcd.clear(); // Borra la pantalla LCD.
@@ -1859,7 +1895,11 @@ void ingreso_celular()
 
             log_generado = Log();
             log_generado.id = contador_logs++;
-            strcpy(log_generado.descripcion, "INGRESOCELFALL");
+            char descripcion[] = "INGRESOCELFALL";
+            char descripcion_cifrado[sizeof(descripcion)];
+            strcpy(descripcion_cifrado, descripcion);
+            dobleCifradoXOR(descripcion_cifrado);
+            strcpy(log_generado.descripcion, descripcion_cifrado);
             write_log(log_generado);
 
             menu_actual = INGRESAR_CELULAR;
@@ -1877,7 +1917,11 @@ void ingreso_celular()
 
             log_generado = Log();
             log_generado.id = contador_logs++;
-            strcpy(log_generado.descripcion, "INGRESOCELFALL");
+            char descripcion[] = "INGRESOCELFALL";
+            char descripcion_cifrado[sizeof(descripcion)];
+            strcpy(descripcion_cifrado, descripcion);
+            dobleCifradoXOR(descripcion_cifrado);
+            strcpy(log_generado.descripcion, descripcion_cifrado);
             write_log(log_generado);
 
             delay(10000); // Pausa de 10 segundos
@@ -2094,7 +2138,11 @@ void retirar_dispositivo(Cajas compartimento)
 
         log_generado = Log();
         log_generado.id = contador_logs++;
-        strcpy(log_generado.descripcion, "RETIROCEL");
+        char descripcion[] = "RETIROCEL";
+        char descripcion_cifrado[sizeof(descripcion)];
+        strcpy(descripcion_cifrado, descripcion);
+        dobleCifradoXOR(descripcion_cifrado);
+        strcpy(log_generado.descripcion, descripcion_cifrado);
         write_log(log_generado);
 
         lcd.clear();
@@ -2119,7 +2167,11 @@ void retirar_dispositivo(Cajas compartimento)
 
             log_generado = Log();
             log_generado.id = contador_logs++;
-            strcpy(log_generado.descripcion, "RETIROCELFALL");
+            char descripcion[] = "RETIROCELFALL";
+            char descripcion_cifrado[sizeof(descripcion)];
+            strcpy(descripcion_cifrado, descripcion);
+            dobleCifradoXOR(descripcion_cifrado);
+            strcpy(log_generado.descripcion, descripcion_cifrado);
             write_log(log_generado);
 
             menu_actual = RETIRAR_CELULAR;
@@ -2134,10 +2186,16 @@ void retirar_dispositivo(Cajas compartimento)
             lcd.print("Incorrect");
             lcd.setCursor(0, 1);
             lcd.print("Credentials");
+
             log_generado = Log();
             log_generado.id = contador_logs++;
-            strcpy(log_generado.descripcion, "RETIROCELFALL");
+            char descripcion[] = "RETIROCELFALL";
+            char descripcion_cifrado[sizeof(descripcion)];
+            strcpy(descripcion_cifrado, descripcion);
+            dobleCifradoXOR(descripcion_cifrado);
+            strcpy(log_generado.descripcion, descripcion_cifrado);
             write_log(log_generado);
+
             delay(10000); // Pausa de 10 segundos
 
             // Cerrar sesión y volver al menú inicial
@@ -2179,7 +2237,11 @@ void eliminar_cuenta()
 
             log_generado = Log();
             log_generado.id = contador_logs++;
-            strcpy(log_generado.descripcion, "ELIMINACUENTA");
+            char descripcion[] = "ELIMINACUENTA";
+            char descripcion_cifrado[sizeof(descripcion)];
+            strcpy(descripcion_cifrado, descripcion);
+            dobleCifradoXOR(descripcion_cifrado);
+            strcpy(log_generado.descripcion, descripcion_cifrado);
             write_log(log_generado);
             
             lcd.setCursor(0, 0);
