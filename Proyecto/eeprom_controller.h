@@ -46,7 +46,9 @@ int get_current_user_address();
 void write_user (Usuarios user);
 Usuarios get_user(int index);
 void update_user(Usuarios user);
+void update_user_state(String name);
 bool is_user_registered(String nombre);
+
 
 
 
@@ -199,6 +201,29 @@ void mostrar_usuarios(){
 
     }
 }
+
+void update_user_state(String name) {
+    int user_count = get_user_count();
+    
+    // Buscar el usuario con el nombre correspondiente
+    for (int i = 0; i < user_count; i++) {
+        Usuarios user = get_user(i);
+        if (strcmp(user.nombre, name.c_str()) == 0) {
+            // Actualizar el estado del usuario
+            memset(user.nombre, 0, sizeof(user.nombre));
+            memset(user.numero, 0, sizeof(user.numero));
+            memset(user.contrasenia, 0, sizeof(user.contrasenia));
+
+            // Escribir los cambios en la EEPROM
+            EEPROM.put(user.address, user);
+            return;  // Salir del método después de actualizar el usuario
+        }
+    }
+    
+    // El usuario con el nombre especificado no fue encontrado
+    Serial.println("Usuario no encontrado");
+}
+
 
 bool is_user_registered(String nombre){
     for(int i = 0; i < get_user_count(); i++){

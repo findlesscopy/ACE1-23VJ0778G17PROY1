@@ -17,7 +17,7 @@
 #define LOOP while (true)
 
 //  MENUS
-const int SECUENCIA_INICIAL = 0, MENU_PRINCIPAL = 1, LOGIN = 2, REGISTER = 3, ADMIN = 4, CLIENTE = 5, ESCOGER_TECLADO = 6, ADMIN_LOGS = 7, ADMIN_STATUS = 8, INGRESAR_CELULAR = 9, RETIRAR_CELULAR = 10;
+const int SECUENCIA_INICIAL = 0, MENU_PRINCIPAL = 1, LOGIN = 2, REGISTER = 3, ADMIN = 4, CLIENTE = 5, ESCOGER_TECLADO = 6, ADMIN_LOGS = 7, ADMIN_STATUS = 8, INGRESAR_CELULAR = 9, RETIRAR_CELULAR = 10, USER_DELETE = 11;
 int menu_actual = SECUENCIA_INICIAL;
 
 //  PINES
@@ -32,6 +32,7 @@ String auxNombre = "";
 int intentos_fallidos = 0;
 int intentos_fallidos_login = 0;
 int intentos_fallidos_login_globales = 0;
+// bool button_:state = false;
 
 int contador_logs = 0;
 
@@ -120,6 +121,8 @@ void ingreso_celular();
 void retiro_celular();
 void retirar_dispositivo(Cajas compartimento);
 
+void eliminar_cuenta();
+void simulate_button_state();
 /// FUNCIONES
 
 void menu_setup()
@@ -136,6 +139,7 @@ void menu_setup()
 
 void menu_loop()
 {
+    simulate_button_state();
     switch (menu_actual)
     {
     case SECUENCIA_INICIAL:
@@ -180,6 +184,9 @@ void menu_loop()
 
     case RETIRAR_CELULAR:
         retiro_celular();
+        break;
+    case USER_DELETE:
+        eliminar_cuenta();
         break;
 
     default:
@@ -860,7 +867,6 @@ void login()
     // Serial.println(usuario.isAdmin);
     if (usuario.is_valid())
     {
-        
 
         lcd.clear();
         lcd.setCursor(0, 0);
@@ -873,7 +879,7 @@ void login()
         authenticated_user = usuario;
 
         if (usuario.isAdmin)
-        {   
+        {
             log_generado = Log();
             log_generado.id = contador_logs++;
             strcpy(log_generado.descripcion, "INICIOADMIN");
@@ -893,7 +899,8 @@ void login()
     }
     else
     {
-        if(intentos_fallidos_login >= 1){
+        if (intentos_fallidos_login >= 1)
+        {
             lcd.clear();
             lcd.print("Incorrect");
             lcd.setCursor(0, 1);
@@ -904,10 +911,8 @@ void login()
             write_log(log_generado);
             delay(10000);
             intentos_fallidos_login = 0;
-            
+
             menu_actual = MENU_PRINCIPAL;
-            
-            
         }
         lcd.clear();
         lcd.setCursor(0, 0);
@@ -1291,6 +1296,7 @@ void registro()
 long int tiempo0 = 0;
 void menu_cliente()
 {
+    
     tiempo0 = millis();
 
     lcd.clear();
@@ -1369,7 +1375,7 @@ void menu_cliente()
                     log_generado.id = contador_logs++;
                     strcpy(log_generado.descripcion, "SESIONCERRADA");
                     write_log(log_generado);
-                    
+
                     menu_actual = MENU_PRINCIPAL;
                     // Cerrar Sesion
                     Serial.println("Opcion 3 Cerrar sesion");
@@ -1378,7 +1384,7 @@ void menu_cliente()
                 else if (opcion == "4")
                 {
                     Serial.println("Opcion eliminar cuenta");
-                    menu_actual = MENU_PRINCIPAL;
+                    menu_actual = USER_DELETE;
                     // Borrar cuenta
                     break;
                 }
@@ -1471,8 +1477,8 @@ void menu_administrar()
                 menu_actual = ADMIN_STATUS;
                 break;
             }
-            else if(opcion2 = "3")
-            {   
+            else if (opcion2 = "3")
+            {
                 log_generado = Log();
                 log_generado.id = contador_logs++;
                 strcpy(log_generado.descripcion, "SESIONCERRADA");
@@ -1572,7 +1578,7 @@ void admin_status()
 {
     lcd.clear(); // Borra la pantalla LCD.
 
-    lcd.setCursor(0, 0);       // Establece el cursor en la posición (1, 0) de la pantalla LCD.
+    lcd.setCursor(0, 0);        // Establece el cursor en la posición (1, 0) de la pantalla LCD.
     lcd.print("Ver el Estado"); // Imprime el mensaje "Bienvenido" en la pantalla LCD.
     lcd.setCursor(0, 1);
     lcd.print("del Sistema");
@@ -1598,10 +1604,12 @@ void admin_status()
     delay(300);
 }
 
-void loop_status(){
+void loop_status()
+{
     bool end = false;
 
-    while(!end){
+    while (!end)
+    {
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("=====STATUS=====");
@@ -1622,7 +1630,7 @@ void loop_status(){
         lcd.setCursor(0, 2);
         lcd.print("Fallidos: ");
         lcd.setCursor(8, 3);
-        lcd.print(String(intentos_fallidos+intentos_fallidos_login_globales));
+        lcd.print(String(intentos_fallidos + intentos_fallidos_login_globales));
 
         delay(3000);
 
@@ -1634,7 +1642,7 @@ void loop_status(){
         lcd.setCursor(0, 2);
         lcd.print("Incidentes: ");
         lcd.setCursor(8, 3);
-        lcd.print("3");// AQUI DEBEN PONER LOS INCIDENTES CON LOS CELULARES
+        lcd.print("3"); // AQUI DEBEN PONER LOS INCIDENTES CON LOS CELULARES
 
         delay(3000);
 
@@ -1646,7 +1654,7 @@ void loop_status(){
         lcd.setCursor(0, 2);
         lcd.print("usuarios: ");
         lcd.setCursor(8, 3);
-        lcd.print(String(get_user_count()-1));
+        lcd.print(String(get_user_count() - 1));
 
         delay(3000);
 
@@ -1784,7 +1792,6 @@ void ingreso_celular()
     strcpy(password_cifrado, password_char);
     dobleCifradoXOR(password_cifrado);
 
-
     Usuarios usuario = login_user(auxNombre, password_cifrado);
 
     if (usuario.is_valid())
@@ -1796,41 +1803,41 @@ void ingreso_celular()
         write_box(compartimento);*/
 
         // Actualizar el estado del compartimiento
-       /**/ 
-       /*Cajas box = Cajas();
-        box.id = compartimento_vacio;
-        box.estado = true;
-        strcpy(box.propietario, auxNombre.c_str());
-        update_box_state(box);*/
-       
-       /**/ /*int box_count = get_box_count();
-        for (int i = 0; i < box_count; i++)
-        {
-            Cajas compartimento = get_box(i);
-            if (compartimento.estado == false)
-            {
-                update_box_state(compartimento);
-                Serial.println(compartimento_vacio);
-                
-                break;
-            }
-        }*/
+        /**/
+        /*Cajas box = Cajas();
+         box.id = compartimento_vacio;
+         box.estado = true;
+         strcpy(box.propietario, auxNombre.c_str());
+         update_box_state(box);*/
+
+        /**/ /*int box_count = get_box_count();
+         for (int i = 0; i < box_count; i++)
+         {
+             Cajas compartimento = get_box(i);
+             if (compartimento.estado == false)
+             {
+                 update_box_state(compartimento);
+                 Serial.println(compartimento_vacio);
+
+                 break;
+             }
+         }*/
 
         update_box_state(compartimento_vacio, true, auxNombre);
         mostrar_box();
+        /*
         // Simulación de desconexión utilizando los botones
         pinMode(compartimento_vacio + 44, OUTPUT);
         digitalWrite(compartimento_vacio + 44, HIGH);
         delay(1000);
-        digitalWrite(compartimento_vacio + 44, LOW);
+        digitalWrite(compartimento_vacio + 44, LOW);*/
 
         Serial.println("Dispositivo ingresado exitosamente.");
-        
+
         log_generado = Log();
         log_generado.id = contador_logs++;
         strcpy(log_generado.descripcion, "INGRESOCEL");
         write_log(log_generado);
-        
 
         lcd.clear(); // Borra la pantalla LCD.
         lcd.setCursor(0, 1);
@@ -1885,10 +1892,10 @@ void ingreso_celular()
     }
 }
 
-int contador_true = 0;
-int global_cajas = 0;
 void retiro_celular()
 {
+    int contador_true = 0;
+    int cajas_user = 0;
     for (int i = 0; i < get_box_count(); i++)
     {
         Cajas compartimento = get_box(i);
@@ -1908,28 +1915,43 @@ void retiro_celular()
         return;
     }
 
-    else if (contador_true == 1)
+    for (int i = 0; i < contador_true; i++)
+    {
+        Cajas compartimento = get_box(i);
+        if (compartimento.estado == true && strcmp(compartimento.propietario, auxNombre.c_str()) == 0)
+        {
+            cajas_user++;
+        }
+    }
+
+    if (cajas_user == 1)
     {
         // El usuario solo tiene un dispositivo en el sistema
-        Cajas compartimento = get_box(0);
-        retirar_dispositivo(compartimento);
-        contador_true--;
-        menu_actual = CLIENTE;
-        return;
+        for (int i = 0; i < contador_true; i++)
+        {
+            Cajas compartimento = get_box(i);
+            if (compartimento.estado == true && strcmp(compartimento.propietario, auxNombre.c_str()) == 0)
+            {
+                retirar_dispositivo(compartimento);
+                contador_true--;
+                menu_actual = CLIENTE;
+                return;
+            }
+        }
     }
     Serial.println(contador_true);
 
     // El usuario tiene más de un dispositivo en el sistema
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print("Select compartment:");
+    lcd.print("Select compart:");
 
     // Mostrar los compartimentos ocupados en el LCD
 
     for (int i = 0; i < contador_true; i++)
     {
         Cajas compartimento = get_box(i);
-        if (compartimento.estado == true)
+        if (compartimento.estado == true && strcmp(compartimento.propietario, auxNombre.c_str()) == 0)
         {
             lcd.setCursor(0, i + 1);
             lcd.print(compartimento.id);
@@ -2065,12 +2087,12 @@ void retirar_dispositivo(Cajas compartimento)
 
         update_box_state(compartimento.id, false, "");
         mostrar_box();
-        // Simulación de desconexión utilizando los botones
+        /*/ Simulación de desconexión utilizando los botones
         pinMode(compartimento.id + 44, OUTPUT);
         digitalWrite(compartimento.id + 44, HIGH);
         delay(1000);
-        digitalWrite(compartimento.id + 44, LOW);
-        
+        digitalWrite(compartimento.id + 44, LOW);*/
+
         log_generado = Log();
         log_generado.id = contador_logs++;
         strcpy(log_generado.descripcion, "RETIROCEL");
@@ -2125,6 +2147,63 @@ void retirar_dispositivo(Cajas compartimento)
             menu_actual = MENU_PRINCIPAL;
             return;
         }
+    }
+}
+
+void eliminar_cuenta()
+{
+    // Verificar si el usuario tiene dispositivos ingresados
+    int compartimentos_ocupados = get_box_count();
+    for (int i = 0; i < compartimentos_ocupados; i++)
+    {
+        Cajas compartimento = get_box(i);
+        if (strcmp(compartimento.propietario, auxNombre.c_str()) == 0)
+        {
+            // Redirigir al usuario al menu de retiro de celular
+            lcd.setCursor(0, 0);
+            lcd.print("Remove device");
+            delay(200);
+            menu_actual = RETIRAR_CELULAR;
+            return;
+        }
+    }
+
+    // Eliminar la cuenta
+
+    for (int i = 0; i < get_user_count(); i++)
+    {
+        Usuarios box = get_user(i);
+        if (strcmp(box.nombre, auxNombre.c_str()) == 0)
+        {
+            // Eliminar usuario
+            update_user_state(auxNombre);
+            lcd.setCursor(0, 0);
+            lcd.print("User deleted");
+            delay(200);
+            Serial.println("User deleted");
+            mostrar_usuarios();
+            menu_actual = MENU_PRINCIPAL;
+            return;
+        }
+    }
+}
+
+void simulate_button_state()
+{
+    int compartimentos_ocupados = get_box_count();
+
+    for (int i = 0; i < compartimentos_ocupados; i++)
+    {
+        Cajas compartimento = get_box(i);
+
+        // Calcular el número del pin correspondiente al compartimento
+        int pin = compartimento.id + 1 + 44;
+
+        // Establecer el modo del pin como salida
+        pinMode(pin, OUTPUT);
+
+        // Encender o apagar el botón según el estado del compartimento
+        digitalWrite(pin, compartimento.estado ? HIGH : LOW);
     }
 }
 
