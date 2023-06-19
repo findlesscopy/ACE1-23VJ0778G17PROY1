@@ -81,8 +81,23 @@ void write_box(Cajas box) {
 }
 
 Cajas get_box(int index) {
-    // TODO : No se que parametros van a necesitar
+  Cajas box;
+  int box_count = get_box_count();
+
+  if (index >= 1 && index <= box_count) {
+    int address = EEPROM_SIZE - (index * sizeof(Cajas));
+    EEPROM.get(address, box);
+  } else {
+    // Compartimiento no válido
+    box.id = -1;
+    box.estado = false;
+    strcpy(box.propietario, "");
+    box.address = -1;
+  }
+
+  return box;
 }
+
 
 
 //      USUARIOS
