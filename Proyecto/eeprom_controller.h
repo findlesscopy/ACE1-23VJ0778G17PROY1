@@ -11,21 +11,34 @@
 
 const int EEPROM_SIZE = 4095;
 
-const int BOX_COUNT_ADDRESS = 0;
-const int CURRENT_BOX_ADDRESS = 1 * sizeof(int);
-const int BOX_BLOCK_START_ADDRESS = 2 * sizeof(int);
-const int MAX_BOX = 9;
-
-const int LOG_COUNT_ADDRESS = MAX_BOX * sizeof(Cajas) + BOX_BLOCK_START_ADDRESS;
-const int CURRENT_LOG_ADDRESS = 1 * sizeof(int) + LOG_COUNT_ADDRESS;
-const int LOG_BLOCK_START_ADDRESS = 2 * sizeof(int) + LOG_COUNT_ADDRESS;
+const int LOG_COUNT_ADDRESS = 0;
+const int CURRENT_LOG_ADDRESS = 1 * sizeof(int);
+const int LOG_BLOCK_START_ADDRESS = 2 * sizeof(int);
 const int MAX_LOG = 99;
 
-const int USER_COUNT_ADDRESS = MAX_LOG * sizeof(Log) + LOG_BLOCK_START_ADDRESS;
+const int BOX_COUNT_ADDRESS = MAX_LOG * sizeof(Log) + LOG_BLOCK_START_ADDRESS;
+const int CURRENT_BOX_ADDRESS = 1 * sizeof(int) + BOX_COUNT_ADDRESS;
+const int BOX_BLOCK_START_ADDRESS = 2 * sizeof(int) + BOX_COUNT_ADDRESS;
+const int MAX_BOX = 9;
+
+const int USER_COUNT_ADDRESS = MAX_BOX * sizeof(Cajas) + LOG_BLOCK_START_ADDRESS;
 const int CURRENT_USER_ADDRESS = 1 * sizeof(int) + USER_COUNT_ADDRESS;
 const int USER_BLOCK_START_ADDRESS = 2 * sizeof(int) + USER_COUNT_ADDRESS;
 
+// Funciones de Cajas
+int get_box_count();
+void set_box_count(int count);
+int get_current_box_address();
+void write_box(Cajas box);
+Cajas get_box(int index);
+//void mostrar_box();
 
+//Funciones de Log
+int get_log_count();
+void set_log_count(int count);
+int get_current_log_address();
+void write_log(Log log);
+Log get_log(int index);
 
 int get_user_count();
 void set_user_count(int count);
@@ -35,19 +48,8 @@ Usuarios get_user(int index);
 void update_user(Usuarios user);
 bool is_user_registered(String nombre);
 
-//Funciones de Log
-int get_log_count();
-void set_log_count(int count);
-int get_current_log_address();
-void write_log(Log log);
-Log get_log(int index);
 
-// Funciones de Cajas
-int get_box_count();
-void set_box_count(int count);
-int get_current_box_address();
-void write_box(Cajas box);
-Cajas get_box(int index);
+
 
 //      CAJAS
 int get_box_count() {
@@ -90,7 +92,7 @@ Cajas get_box(int index) {
         return box;
     }
 
-    int address = LOG_BLOCK_START_ADDRESS + (index * sizeof(Cajas));
+    int address = BOX_BLOCK_START_ADDRESS + (index * sizeof(Cajas));
     EEPROM.get(address, box);
     return box;
 }
@@ -98,6 +100,42 @@ Cajas get_box(int index) {
 
 void update_box_state(Cajas boxs){
     EEPROM.put(boxs.address, boxs);  //PUEDEN USAR ESTA PARA ACTUALIZAR LOS DATOS DE UN USUARIO A 0000000000
+}
+
+
+void update_box_state(int id, bool estado, String name) {
+    int box_count = get_box_count();
+    
+    // Buscar el compartimento con el ID correspondiente
+    for (int i = 0; i < box_count; i++) {
+        Cajas box = get_box(i);
+        if (box.id == id) {
+            // Actualizar el estado del compartimento
+            box.estado = estado;
+            strcpy(box.propietario, name.c_str());
+            
+            // Escribir los cambios en la EEPROM
+            EEPROM.put(box.address, box);
+            return;  // Salir del método después de actualizar el compartimento
+        }
+    }
+    
+    // El compartimento con el ID especificado no fue encontrado
+    Serial.println("Compartimento no encontrado");
+}
+
+
+void mostrar_box(){
+    for(int i = 0; i < get_box_count(); i++){
+        Cajas box = get_box(i);
+        Serial.print("Caja: ");
+        Serial.println(box.id);
+        Serial.print("Estado: ");
+        Serial.println(box.estado);
+        Serial.print("Propiertario: ");
+        Serial.println(box.propietario);
+
+    }
 }
 
 //      USUARIOS
@@ -149,6 +187,17 @@ Usuarios get_user(int index) {
 
 void update_user(Usuarios user){
     EEPROM.put(user.address, user);  //PUEDEN USAR ESTA PARA ACTUALIZAR LOS DATOS DE UN USUARIO A 0000000000
+}
+
+void mostrar_usuarios(){
+    for(int i = 0; i < get_user_count(); i++){
+        Usuarios box = get_user(i);
+        Serial.print("Nombre: ");
+        Serial.println(box.nombre);
+        Serial.print("Contrasenia: ");
+        Serial.println(box.contrasenia);
+
+    }
 }
 
 bool is_user_registered(String nombre){
@@ -207,15 +256,29 @@ Log get_log(int index){
     return log;
 }
 
+
+void mostrar_logs(){
+    for(int i = 0; i < get_log_count(); i++){
+        Log box = get_log(i);
+        Serial.print("ID: ");
+        Serial.println(box.id);
+        Serial.print("Desc: ");
+        Serial.println(box.descripcion);
+
+    }
+}
+
 void reset_eeprom(){
-    EEPROM.put(BOX_COUNT_ADDRESS, 0);
-    EEPROM.put(CURRENT_BOX_ADDRESS, BOX_BLOCK_START_ADDRESS);
+
 
     EEPROM.put(USER_COUNT_ADDRESS, 0);
     EEPROM.put(CURRENT_USER_ADDRESS, USER_BLOCK_START_ADDRESS);
 
     EEPROM.put(LOG_COUNT_ADDRESS, 0);
     EEPROM.put(CURRENT_LOG_ADDRESS, LOG_BLOCK_START_ADDRESS);
+
+    EEPROM.put(BOX_COUNT_ADDRESS, 0);
+    EEPROM.put(CURRENT_BOX_ADDRESS, BOX_BLOCK_START_ADDRESS);
 
     Serial.println("EEPROM RESETED");
 
@@ -269,57 +332,100 @@ void reset_eeprom(){
     Serial.println(contrasenia_cifrada1);
     write_user(user1);
 
-    Log log = Log();
+    Log log;
+
+    log = Log();
     log.id = 1;
     strcpy(log.descripcion, "INCIOADMIN");
     write_log(log);
 
+    log = Log();
     log.id = 2;
     strcpy(log.descripcion, "INCIOUSER");
     write_log(log);
 
+    log = Log();
+    log.id = 3;
+    strcpy(log.descripcion, "INCIOUSER");
+    write_log(log);
+
+    log = Log();
+    log.id = 4;
+    strcpy(log.descripcion, "INCIOUSER");
+    write_log(log);
+
+    log = Log();
+    log.id = 5;
+    strcpy(log.descripcion, "INCIOUSER");
+    write_log(log);
+
+    log = Log();
+    log.id = 6;
+    strcpy(log.descripcion, "INCIOUSER");
+    write_log(log);
+
+    log = Log();
+    log.id = 7;
+    strcpy(log.descripcion, "INCIOUSER");
+    write_log(log);
+
+    log = Log();
+    log.id = 8;
+    strcpy(log.descripcion, "INCIOUSER");
+    write_log(log);
+
     
-    Cajas box = Cajas();
+    Cajas box ;
+
+    box = Cajas();
     box.id = 0;
     box.estado = false;
-    strcpy(box.propietario, "");
+    strcpy(box.propietario, "Prop1");
     write_box(box);
 
+    box = Cajas();
     box.id = 1;
     box.estado = false;
-    strcpy(box.propietario, "");
+    strcpy(box.propietario, "Prop2");
     write_box(box);
 
+    box = Cajas();
     box.id = 2;
     box.estado = false;
-    strcpy(box.propietario, "");
+    strcpy(box.propietario, "Prop3");
     write_box(box);
     
+    box = Cajas();
     box.id = 3;
     box.estado = false;
-    strcpy(box.propietario, "");
+    strcpy(box.propietario, "Prop4");
     write_box(box);
 
-     box.id = 4;
+    box = Cajas();
+    box.id = 4;
     box.estado = false;
     strcpy(box.propietario, "");
     write_box(box);
 
+    box = Cajas();
     box.id = 5;
     box.estado = false;
     strcpy(box.propietario, "");
     write_box(box);
     
+    box = Cajas();
     box.id = 6;
     box.estado = false;
     strcpy(box.propietario, "");
     write_box(box);
     
-     box.id = 7;
+    box = Cajas();
+    box.id = 7;
     box.estado = false;
     strcpy(box.propietario, "");
     write_box(box);
 
+    box = Cajas();
     box.id = 8;
     box.estado = false;
     strcpy(box.propietario, "");

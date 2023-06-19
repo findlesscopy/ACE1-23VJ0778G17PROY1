@@ -1666,12 +1666,28 @@ void ingreso_celular()
         write_box(compartimento);*/
 
         // Actualizar el estado del compartimiento
-        Cajas box = Cajas();
+       /**/ 
+       /*Cajas box = Cajas();
         box.id = compartimento_vacio;
-        box.estado = false;
+        box.estado = true;
         strcpy(box.propietario, auxNombre.c_str());
-        update_box_state(box);
+        update_box_state(box);*/
+       
+       /**/ /*int box_count = get_box_count();
+        for (int i = 0; i < box_count; i++)
+        {
+            Cajas compartimento = get_box(i);
+            if (compartimento.estado == false)
+            {
+                update_box_state(compartimento);
+                Serial.println(compartimento_vacio);
+                
+                break;
+            }
+        }*/
 
+        update_box_state(compartimento_vacio, true, auxNombre);
+        mostrar_box();
         // Simulación de desconexión utilizando los botones
         pinMode(compartimento_vacio + 44, OUTPUT);
         digitalWrite(compartimento_vacio + 44, HIGH);
@@ -1722,7 +1738,7 @@ void ingreso_celular()
 }
 
 int contador_true = 0;
-
+int global_cajas = 0;
 void retiro_celular()
 {
     for (int i = 0; i < get_box_count(); i++)
@@ -1749,8 +1765,6 @@ void retiro_celular()
         // El usuario solo tiene un dispositivo en el sistema
         Cajas compartimento = get_box(0);
         retirar_dispositivo(compartimento);
-        // Actualizar el estado del compartimiento
-        update_box_state(compartimento);
         contador_true--;
         menu_actual = CLIENTE;
         return;
@@ -1771,6 +1785,7 @@ void retiro_celular()
         {
             lcd.setCursor(0, i + 1);
             lcd.print(compartimento.id);
+            Serial.print(compartimento.id);
         }
     }
 
@@ -1910,6 +1925,8 @@ void retirar_dispositivo(Cajas compartimento)
     {
         // Contraseña correcta, proceder con el retiro del dispositivo
 
+        update_box_state(compartimento.id, false, "");
+        mostrar_box();
         // Simulación de desconexión utilizando los botones
         pinMode(compartimento.id + 44, OUTPUT);
         digitalWrite(compartimento.id + 44, HIGH);
@@ -1920,7 +1937,7 @@ void retirar_dispositivo(Cajas compartimento)
         lcd.setCursor(0, 0);
         lcd.print("Device Removed");
         delay(2000);
-        //update_box_state(compartimento.id, false);
+        // update_box_state(compartimento.id, false);
         menu_actual = CLIENTE;
         return;
     }
