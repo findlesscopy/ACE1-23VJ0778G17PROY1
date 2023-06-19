@@ -315,13 +315,13 @@ void reset_eeprom(){
     EEPROM.put(BOX_COUNT_ADDRESS, 0);
     EEPROM.put(CURRENT_BOX_ADDRESS, BOX_BLOCK_START_ADDRESS);
 
-    Serial.println("EEPROM RESETED");
+    Serial.println("SE RESETEO LA EEPROM");
 
     // INIT ADMIN USER
 
     Usuarios admin = Usuarios();
     admin.isAdmin = true;
-    char nombre[] = "a";// Pruebas solamente "ADMIN*94069"
+    char nombre[] = "admin*94069";// Pruebas solamente "ADMIN*94069"
     char nombre_cifrado[sizeof(nombre)];
     strcpy(nombre_cifrado, nombre);
     dobleCifradoXOR(nombre_cifrado);
@@ -331,7 +331,7 @@ void reset_eeprom(){
     strcpy(numero_cifrado, numero);
     dobleCifradoXOR(numero_cifrado);
 
-    char contrasenia[] = "3";// Pruebas solamente "GRUPO17"
+    char contrasenia[] = "grupo17";// Pruebas solamente "GRUPO17"
     char contrasenia_cifrada[sizeof(contrasenia)];
     strcpy(contrasenia_cifrada, contrasenia);
     dobleCifradoXOR(contrasenia_cifrada);
@@ -339,13 +339,14 @@ void reset_eeprom(){
     strcpy(admin.nombre, nombre_cifrado);
     strcpy(admin.numero, numero_cifrado);
     strcpy(admin.contrasenia, contrasenia_cifrada);
-    Serial.println(nombre_cifrado);
-    Serial.println(contrasenia_cifrada);
+    //Serial.println(nombre_cifrado);
+    //Serial.println(contrasenia_cifrada);
     write_user(admin);
 
+    /*
     Usuarios user1 = Usuarios();
     user1.isAdmin = false;
-    char nombre1[] = "b";// Pruebas solamente "ADMIN*94069"
+    char nombre1[] = "a";// Pruebas solamente "ADMIN*94069"
     char nombre_cifrado1[sizeof(nombre1)];
     strcpy(nombre_cifrado1, nombre1);
     dobleCifradoXOR(nombre_cifrado1);
@@ -355,7 +356,7 @@ void reset_eeprom(){
     strcpy(numero_cifrado1, numero1);
     dobleCifradoXOR(numero_cifrado1);
 
-    char contrasenia1[] = "2";// Pruebas solamente "GRUPO17"
+    char contrasenia1[] = "1";// Pruebas solamente "GRUPO17"
     char contrasenia_cifrada1[sizeof(contrasenia1)];
     strcpy(contrasenia_cifrada1, contrasenia1);
     dobleCifradoXOR(contrasenia_cifrada1);
@@ -366,32 +367,32 @@ void reset_eeprom(){
     Serial.println(nombre_cifrado1);
     Serial.println(contrasenia_cifrada1);
     write_user(user1);
-
+    */
     
     Cajas box ;
 
     box = Cajas();
     box.id = 0;
-    box.estado = true;
-    strcpy(box.propietario, "Prop1");
+    box.estado = false;
+    strcpy(box.propietario, "");
     write_box(box);
 
     box = Cajas();
     box.id = 1;
-    box.estado = true;
-    strcpy(box.propietario, "Prop2");
+    box.estado = false;
+    strcpy(box.propietario, "");
     write_box(box);
 
     box = Cajas();
     box.id = 2;
-    box.estado = true;
-    strcpy(box.propietario, "Prop3");
+    box.estado = false;
+    strcpy(box.propietario, "");
     write_box(box);
     
     box = Cajas();
     box.id = 3;
     box.estado = false;
-    strcpy(box.propietario, "Prop4");
+    strcpy(box.propietario, "");
     write_box(box);
 
     box = Cajas();

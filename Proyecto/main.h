@@ -298,7 +298,7 @@ String recibir_texto_app(char *mensaje, char *titulo)
     LOOP
     {
 
-        Serial.println("Entro a loop nombre");
+        //Serial.println("Entro a loop nombre");
         if (termino)
         {
             break;
@@ -408,11 +408,11 @@ void menu_seleccionar_teclado(int estado_menu_ingresos)
             {
                 APLICACION_ACTIVA = true;
                 KEYPAD_ACTIVO = false;
-                Serial.println("1");
-                Serial.print("APP");
-                Serial.println(APLICACION_ACTIVA);
-                Serial.print("Key");
-                Serial.println(KEYPAD_ACTIVO);
+                //Serial.println("1");
+                //Serial.print("APP");
+                //Serial.println(APLICACION_ACTIVA);
+                //Serial.print("Key");
+                //Serial.println(KEYPAD_ACTIVO);
                 conectar_dispositivo();
                 salir = true;
             }
@@ -420,11 +420,11 @@ void menu_seleccionar_teclado(int estado_menu_ingresos)
             {
                 APLICACION_ACTIVA = false;
                 KEYPAD_ACTIVO = true;
-                Serial.println("2");
-                Serial.print("APP");
-                Serial.println(APLICACION_ACTIVA);
-                Serial.print("Key");
-                Serial.println(KEYPAD_ACTIVO);
+                //Serial.println("2");
+                //Serial.print("APP");
+                //Serial.println(APLICACION_ACTIVA);
+                //Serial.print("Key");
+                //Serial.println(KEYPAD_ACTIVO);
                 switch (estado_menu_ingresos)
                 {
                 case 0:
@@ -629,7 +629,7 @@ void letras_matriz()
         }
         if (Btn_Ok.is_pressed())
         {
-            Serial.println(cadena);
+            //Serial.println(cadena);
             // return cadena;
             break;
         }
@@ -727,7 +727,7 @@ void login()
 
         if (Btn_Ok.is_pressed())
         {
-            Serial.println(nombre);
+            //Serial.println(nombre);
             break;
         }
         if (Btn_Cancel.is_pressed())
@@ -742,7 +742,7 @@ void login()
             }
         }
     }
-    Serial.println("Sali del nombre");
+    //Serial.println("Sali del nombre");
     // lcd.clear();
 
     lcd.setCursor(0, 2);
@@ -799,7 +799,7 @@ void login()
                     break;
                 }
 
-                if (password.length() < 8)
+                if (password.length() <= 8)
                 {
                     lcd.setCursor(0, 3);
                     lcd.print(password);
@@ -828,7 +828,7 @@ void login()
         }
         if (Btn_Ok.is_pressed())
         {
-            Serial.println(password);
+            //Serial.println(password);
             break;
         }
         if (Btn_Cancel.is_pressed())
@@ -855,10 +855,10 @@ void login()
     strcpy(password_cifrado, password_char);
     dobleCifradoXOR(password_cifrado);
 
-    Serial.print("Nombre cifrado: ");
-    Serial.println(nombre_cifrado);
-    Serial.print("Password cifrado: ");
-    Serial.println(password_cifrado);
+    //Serial.print("Nombre cifrado: ");
+    //Serial.println(nombre_cifrado);
+    //Serial.print("Password cifrado: ");
+    //Serial.println(password_cifrado);
 
     Usuarios usuario = login_user(nombre_cifrado, password_cifrado);
     auxNombre = nombre_cifrado; // guardara el nombre en global para verificaciones
@@ -1006,7 +1006,7 @@ void registro()
         }
         if (Btn_Ok.is_pressed())
         {
-            Serial.println(nombre_registro);
+            //Serial.println(nombre_registro);
             break;
         }
         if (Btn_Cancel.is_pressed())
@@ -1096,7 +1096,7 @@ void registro()
         }
         if (Btn_Ok.is_pressed())
         {
-            Serial.println(celular_registro);
+            //Serial.println(celular_registro);
             break;
         }
         if (Btn_Cancel.is_pressed())
@@ -1186,7 +1186,7 @@ void registro()
         }
         if (Btn_Ok.is_pressed())
         {
-            Serial.println(password_registro);
+            //Serial.println(password_registro);
             break;
         }
         if (Btn_Cancel.is_pressed())
@@ -1282,7 +1282,6 @@ void registro()
         Serial.print("Usuario registrado: ");
         lcd.clear();
         lcd.setCursor(0, 1);
-        lcd.print("Usuario registrado");
         delay(1000);
 
         write_user(usuario);
@@ -1770,7 +1769,7 @@ void ingreso_celular()
         }
         if (Btn_Ok.is_pressed())
         {
-            Serial.println(password);
+            //Serial.println(password);
             break;
         }
         if (Btn_Cancel.is_pressed())
@@ -1939,7 +1938,7 @@ void retiro_celular()
             }
         }
     }
-    Serial.println(contador_true);
+    //Serial.println(contador_true);
 
     // El usuario tiene más de un dispositivo en el sistema
     lcd.clear();
@@ -1955,7 +1954,7 @@ void retiro_celular()
         {
             lcd.setCursor(0, i + 1);
             lcd.print(compartimento.id);
-            Serial.print(compartimento.id);
+            //Serial.print(compartimento.id);
         }
     }
 
@@ -2057,7 +2056,7 @@ void retirar_dispositivo(Cajas compartimento)
         }
         if (Btn_Ok.is_pressed())
         {
-            Serial.println(password);
+            //Serial.println(password);
             break;
         }
         if (Btn_Cancel.is_pressed())
@@ -2177,6 +2176,12 @@ void eliminar_cuenta()
         {
             // Eliminar usuario
             update_user_state(auxNombre);
+
+            log_generado = Log();
+            log_generado.id = contador_logs++;
+            strcpy(log_generado.descripcion, "ELIMINACUENTA");
+            write_log(log_generado);
+            
             lcd.setCursor(0, 0);
             lcd.print("User deleted");
             delay(200);

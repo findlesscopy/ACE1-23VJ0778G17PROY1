@@ -16,8 +16,8 @@ void setup() {
     Serial.begin(9600);
     Serial1.begin(9600);
     reset_eeprom(); // ! Just for the first time
-    Serial.print("Tamanio EEPROM ");
-    Serial.println(get_user_count());
+    //Serial.print("Tamanio EEPROM ");
+    //Serial.println(get_user_count());
     menu_setup();
 
 }
