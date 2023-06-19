@@ -30,6 +30,10 @@ LedControl matriz(din, clk, cs, 1);
 // Variable auxiliar Nombre usuario
 String auxNombre = "";
 int intentos_fallidos = 0;
+int intentos_fallidos_login = 0;
+int intentos_fallidos_login_globales = 0;
+
+int contador_logs = 0;
 
 // BOTONES
 Button Btn_Ok(23);
@@ -88,6 +92,7 @@ String recibir_texto_app(char *mensaje, char *titulo);
 
 /* Usuario */
 Usuarios authenticated_user;
+Log log_generado;
 
 int letra_actual_index = 0;
 // FUNCIONES
@@ -103,6 +108,7 @@ void login();
 void registro();
 void admin_logs();
 void admin_status();
+void loop_status();
 void loop_logs();
 void letras_matriz();
 void menu_administrar();
@@ -440,9 +446,9 @@ void menu_seleccionar_teclado(int estado_menu_ingresos)
             if (opcion.length() > 0)
             {
                 opcion.remove(opcion.length() - 1);
-                lcd.setCursor(0, 1);
+                lcd.setCursor(12, 3);
                 lcd.print("                ");
-                lcd.setCursor(0, 1);
+                lcd.setCursor(12, 3);
                 lcd.print(opcion);
             }
         }
@@ -535,9 +541,9 @@ void menu_principal()
             if (opcion.length() > 0)
             {
                 opcion.remove(opcion.length() - 1);
-                lcd.setCursor(0, 1);
+                lcd.setCursor(12, 3);
                 lcd.print("                ");
-                lcd.setCursor(0, 1);
+                lcd.setCursor(12, 3);
                 lcd.print(opcion);
             }
         }
@@ -854,32 +860,66 @@ void login()
     // Serial.println(usuario.isAdmin);
     if (usuario.is_valid())
     {
+        
+
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("Bienvenido");
         lcd.setCursor(0, 1);
-        lcd.print(usuario.nombre);
+        char *nombre_char = usuario.nombre;
+        dobleDescifradoXOR(nombre_char);
+        lcd.print(nombre_char);
 
         authenticated_user = usuario;
 
         if (usuario.isAdmin)
-        {
+        {   
+            log_generado = Log();
+            log_generado.id = contador_logs++;
+            strcpy(log_generado.descripcion, "INICIOADMIN");
+            write_log(log_generado);
             delay(1000);
             menu_actual = ADMIN;
         }
         else
         {
+            log_generado = Log();
+            log_generado.id = contador_logs++;
+            strcpy(log_generado.descripcion, "INICIOSESION");
+            write_log(log_generado);
             delay(1000);
             menu_actual = CLIENTE;
         }
     }
     else
     {
+        if(intentos_fallidos_login >= 1){
+            lcd.clear();
+            lcd.print("Incorrect");
+            lcd.setCursor(0, 1);
+            lcd.print("Credentials");
+            log_generado = Log();
+            log_generado.id = contador_logs++;
+            strcpy(log_generado.descripcion, "FALLOSESION");
+            write_log(log_generado);
+            delay(10000);
+            intentos_fallidos_login = 0;
+            
+            menu_actual = MENU_PRINCIPAL;
+            
+            
+        }
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("Incorrect");
         lcd.setCursor(0, 1);
         lcd.print("Credentials");
+        log_generado = Log();
+        log_generado.id = contador_logs++;
+        strcpy(log_generado.descripcion, "FALLOSESION");
+        write_log(log_generado);
+        intentos_fallidos_login_globales++;
+        intentos_fallidos_login++;
         delay(1000);
     }
 }
@@ -1325,6 +1365,11 @@ void menu_cliente()
                 }
                 else if (opcion == "3")
                 {
+                    log_generado = Log();
+                    log_generado.id = contador_logs++;
+                    strcpy(log_generado.descripcion, "SESIONCERRADA");
+                    write_log(log_generado);
+                    
                     menu_actual = MENU_PRINCIPAL;
                     // Cerrar Sesion
                     Serial.println("Opcion 3 Cerrar sesion");
@@ -1426,6 +1471,15 @@ void menu_administrar()
                 menu_actual = ADMIN_STATUS;
                 break;
             }
+            else if(opcion2 = "3")
+            {   
+                log_generado = Log();
+                log_generado.id = contador_logs++;
+                strcpy(log_generado.descripcion, "SESIONCERRADA");
+                write_log(log_generado);
+                menu_actual = MENU_PRINCIPAL;
+                break;
+            }
             else
             {
                 break;
@@ -1437,9 +1491,9 @@ void menu_administrar()
             if (opcion2.length() > 0)
             {
                 opcion2.remove(opcion2.length() - 1);
-                lcd.setCursor(0, 1);
+                lcd.setCursor(12, 3);
                 lcd.print("                ");
-                lcd.setCursor(0, 1);
+                lcd.setCursor(12, 3);
                 lcd.print(opcion2);
             }
         }
@@ -1511,11 +1565,95 @@ void loop_logs()
             }
         }
     }
+    menu_actual = ADMIN;
 }
 
 void admin_status()
 {
-    Serial.println("Ver el status");
+    lcd.clear(); // Borra la pantalla LCD.
+
+    lcd.setCursor(0, 0);       // Establece el cursor en la posición (1, 0) de la pantalla LCD.
+    lcd.print("Ver el Estado"); // Imprime el mensaje "Bienvenido" en la pantalla LCD.
+    lcd.setCursor(0, 1);
+    lcd.print("del Sistema");
+    lcd.setCursor(0, 2);
+    lcd.print("Presiona Ok");
+    lcd.setCursor(0, 3);
+    lcd.print("para inciciar");
+
+    while (true)
+    {
+        if (Btn_Ok.is_pressed())
+        {
+
+            loop_status();
+            break;
+        }
+        if (Btn_Cancel.is_pressed())
+        {
+            break;
+        }
+    }
+    // Imprime diferentes nombres en la pantalla LCD.
+    delay(300);
+}
+
+void loop_status(){
+    bool end = false;
+
+    while(!end){
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("=====STATUS=====");
+        lcd.setCursor(0, 1);
+        lcd.print("Celulares");
+        lcd.setCursor(0, 2);
+        lcd.print("Ingresados: ");
+        lcd.setCursor(8, 3);
+        lcd.print(String(get_boxes_ocuped()));
+
+        delay(3000);
+
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("=====STATUS=====");
+        lcd.setCursor(0, 1);
+        lcd.print("Intentos");
+        lcd.setCursor(0, 2);
+        lcd.print("Fallidos: ");
+        lcd.setCursor(8, 3);
+        lcd.print(String(intentos_fallidos+intentos_fallidos_login_globales));
+
+        delay(3000);
+
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("=====STATUS=====");
+        lcd.setCursor(0, 1);
+        lcd.print("Cantidad");
+        lcd.setCursor(0, 2);
+        lcd.print("Incidentes: ");
+        lcd.setCursor(8, 3);
+        lcd.print("3");// AQUI DEBEN PONER LOS INCIDENTES CON LOS CELULARES
+
+        delay(3000);
+
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("=====STATUS=====");
+        lcd.setCursor(0, 1);
+        lcd.print("Cantidad ");
+        lcd.setCursor(0, 2);
+        lcd.print("usuarios: ");
+        lcd.setCursor(8, 3);
+        lcd.print(String(get_user_count()-1));
+
+        delay(3000);
+
+        end = true;
+    }
+
+    menu_actual = ADMIN;
 }
 
 void ingreso_celular()
@@ -1646,17 +1784,9 @@ void ingreso_celular()
     strcpy(password_cifrado, password_char);
     dobleCifradoXOR(password_cifrado);
 
-    /*
-    Serial.print("Nombre cifrado: ");
-    Serial.println(nombre_cifrado);
-    Serial.print("Password cifrado: ");
-    Serial.println(password_cifrado);
-    */
 
     Usuarios usuario = login_user(auxNombre, password_cifrado);
 
-    // Serial.println(usuario.is_valid());
-    // Serial.println(usuario.isAdmin);
     if (usuario.is_valid())
     {
         /*/ Guardar los cambios en el compartimento
@@ -1695,6 +1825,12 @@ void ingreso_celular()
         digitalWrite(compartimento_vacio + 44, LOW);
 
         Serial.println("Dispositivo ingresado exitosamente.");
+        
+        log_generado = Log();
+        log_generado.id = contador_logs++;
+        strcpy(log_generado.descripcion, "INGRESOCEL");
+        write_log(log_generado);
+        
 
         lcd.clear(); // Borra la pantalla LCD.
         lcd.setCursor(0, 1);
@@ -1714,6 +1850,12 @@ void ingreso_celular()
             lcd.print("Incorrect");
             lcd.setCursor(0, 1);
             lcd.print("Credentials");
+
+            log_generado = Log();
+            log_generado.id = contador_logs++;
+            strcpy(log_generado.descripcion, "INGRESOCELFALL");
+            write_log(log_generado);
+
             menu_actual = INGRESAR_CELULAR;
             return;
         }
@@ -1726,6 +1868,12 @@ void ingreso_celular()
             lcd.print("Incorrect");
             lcd.setCursor(0, 1);
             lcd.print("Credentials");
+
+            log_generado = Log();
+            log_generado.id = contador_logs++;
+            strcpy(log_generado.descripcion, "INGRESOCELFALL");
+            write_log(log_generado);
+
             delay(10000); // Pausa de 10 segundos
 
             // Cerrar sesión y volver al menú inicial
@@ -1909,17 +2057,7 @@ void retirar_dispositivo(Cajas compartimento)
     strcpy(password_cifrado, password_char);
     dobleCifradoXOR(password_cifrado);
 
-    /*
-    Serial.print("Nombre cifrado: ");
-    Serial.println(nombre_cifrado);
-    Serial.print("Password cifrado: ");
-    Serial.println(password_cifrado);
-    */
-
     Usuarios usuario = login_user(auxNombre, password_cifrado);
-
-    // Serial.println(usuario.is_valid());
-    // Serial.println(usuario.isAdmin);
 
     if (usuario.is_valid())
     {
@@ -1932,6 +2070,11 @@ void retirar_dispositivo(Cajas compartimento)
         digitalWrite(compartimento.id + 44, HIGH);
         delay(1000);
         digitalWrite(compartimento.id + 44, LOW);
+        
+        log_generado = Log();
+        log_generado.id = contador_logs++;
+        strcpy(log_generado.descripcion, "RETIROCEL");
+        write_log(log_generado);
 
         lcd.clear();
         lcd.setCursor(0, 0);
@@ -1952,6 +2095,12 @@ void retirar_dispositivo(Cajas compartimento)
             lcd.print("Incorrect");
             lcd.setCursor(0, 1);
             lcd.print("Credentials");
+
+            log_generado = Log();
+            log_generado.id = contador_logs++;
+            strcpy(log_generado.descripcion, "RETIROCELFALL");
+            write_log(log_generado);
+
             menu_actual = RETIRAR_CELULAR;
             return;
         }
@@ -1964,6 +2113,10 @@ void retirar_dispositivo(Cajas compartimento)
             lcd.print("Incorrect");
             lcd.setCursor(0, 1);
             lcd.print("Credentials");
+            log_generado = Log();
+            log_generado.id = contador_logs++;
+            strcpy(log_generado.descripcion, "RETIROCELFALL");
+            write_log(log_generado);
             delay(10000); // Pausa de 10 segundos
 
             // Cerrar sesión y volver al menú inicial

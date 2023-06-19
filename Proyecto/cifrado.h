@@ -19,7 +19,7 @@ void dobleCifradoXOR(char* mensaje) {
   }
 }
 
-void dobleDescifradoXOR(char mensaje[]) {
+void dobleDescifradoXOR(char* mensaje) {
   int longitud = strlen(mensaje);
   
   for (int i = 0; i < longitud; i++) {

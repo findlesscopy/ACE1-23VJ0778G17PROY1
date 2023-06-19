@@ -31,7 +31,7 @@ void set_box_count(int count);
 int get_current_box_address();
 void write_box(Cajas box);
 Cajas get_box(int index);
-//void mostrar_box();
+int get_boxes_ocuped();
 
 //Funciones de Log
 int get_log_count();
@@ -256,6 +256,16 @@ Log get_log(int index){
     return log;
 }
 
+int get_boxes_ocuped(){
+    int count = 0;
+    for(int i = 0; i < get_box_count(); i++){
+        Cajas box = get_box(i);
+        if(box.estado){
+            count++;
+        }
+    }
+    return count;
+}
 
 void mostrar_logs(){
     for(int i = 0; i < get_log_count(); i++){
@@ -332,66 +342,24 @@ void reset_eeprom(){
     Serial.println(contrasenia_cifrada1);
     write_user(user1);
 
-    Log log;
-
-    log = Log();
-    log.id = 1;
-    strcpy(log.descripcion, "INCIOADMIN");
-    write_log(log);
-
-    log = Log();
-    log.id = 2;
-    strcpy(log.descripcion, "INCIOUSER");
-    write_log(log);
-
-    log = Log();
-    log.id = 3;
-    strcpy(log.descripcion, "INCIOUSER");
-    write_log(log);
-
-    log = Log();
-    log.id = 4;
-    strcpy(log.descripcion, "INCIOUSER");
-    write_log(log);
-
-    log = Log();
-    log.id = 5;
-    strcpy(log.descripcion, "INCIOUSER");
-    write_log(log);
-
-    log = Log();
-    log.id = 6;
-    strcpy(log.descripcion, "INCIOUSER");
-    write_log(log);
-
-    log = Log();
-    log.id = 7;
-    strcpy(log.descripcion, "INCIOUSER");
-    write_log(log);
-
-    log = Log();
-    log.id = 8;
-    strcpy(log.descripcion, "INCIOUSER");
-    write_log(log);
-
     
     Cajas box ;
 
     box = Cajas();
     box.id = 0;
-    box.estado = false;
+    box.estado = true;
     strcpy(box.propietario, "Prop1");
     write_box(box);
 
     box = Cajas();
     box.id = 1;
-    box.estado = false;
+    box.estado = true;
     strcpy(box.propietario, "Prop2");
     write_box(box);
 
     box = Cajas();
     box.id = 2;
-    box.estado = false;
+    box.estado = true;
     strcpy(box.propietario, "Prop3");
     write_box(box);
     
