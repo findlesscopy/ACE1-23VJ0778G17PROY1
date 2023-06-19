@@ -171,7 +171,7 @@ void menu_loop()
     case INGRESAR_CELULAR:
         ingreso_celular();
         break;
-    
+
     case RETIRAR_CELULAR:
         retiro_celular();
         break;
@@ -1309,16 +1309,16 @@ void menu_cliente()
                 int num;
                 if (opcion == "1")
                 {
-                    //menu_actual = MENU_PRINCIPAL;
-                    // Ingresar telefonos
+                    // menu_actual = MENU_PRINCIPAL;
+                    //  Ingresar telefonos
                     Serial.println("Opcion ingresar telefonos");
                     menu_actual = INGRESAR_CELULAR;
                     break;
                 }
                 else if (opcion == "2")
                 {
-                    //menu_actual = MENU_PRINCIPAL;
-                    // Retirar Telefonos
+                    // menu_actual = MENU_PRINCIPAL;
+                    //  Retirar Telefonos
                     Serial.println("Opcion Retirar telefonos");
                     menu_actual = RETIRAR_CELULAR;
                     break;
@@ -1522,28 +1522,15 @@ void ingreso_celular()
 {
     int compartimento_vacio = -1;
 
-    int box_count = get_box_count();
-
     // Buscar primer compartimiento vacío
-    for (int i = 1; i <= 9; i++)
+    int box_count = get_box_count();
+    for (int i = 0; i < box_count; i++)
     {
-        bool compartimiento_encontrado = false;
-
-        // Verificar si el compartimiento está ocupado
-        for (int j = 0; j < box_count; j++)
+        Cajas compartimento = get_box(i);
+        if (compartimento.estado == false)
         {
-            Cajas compartimento = get_box(j);
-            if (compartimento.id == i && compartimento.estado)
-            {
-                compartimiento_encontrado = true;
-                break;
-            }
-        }
-
-        // Si el compartimiento no está ocupado, asignarlo como vacío
-        if (!compartimiento_encontrado)
-        {
-            compartimento_vacio = i;
+            compartimento_vacio = compartimento.id;
+            Serial.println(compartimento_vacio);
             break;
         }
     }
@@ -1556,14 +1543,14 @@ void ingreso_celular()
         lcd.print("No hay compart.");
         lcd.setCursor(0, 1);
         lcd.print("vacíos disponibles.");
-        // MENUPRINCIPAL
+        menu_actual = CLIENTE;
         // MENUPRINCIPAL
         return;
     }
 
     //----- panel u blutoh
     lcd.clear(); // Borra la pantalla LCD.
-    lcd.setCursor(0, 2);
+    lcd.setCursor(0, 1);
     lcd.print("Password: ");
     // lcd.setCursor(0, 0);
     String password = "";
@@ -1635,6 +1622,22 @@ void ingreso_celular()
                 }
             }
         }
+        if (Btn_Ok.is_pressed())
+        {
+            Serial.println(password);
+            break;
+        }
+        if (Btn_Cancel.is_pressed())
+        {
+            if (password.length() > 0)
+            {
+                password.remove(password.length() - 1);
+                lcd.setCursor(3, 1);
+                lcd.print("                ");
+                lcd.setCursor(3, 1);
+                lcd.print(password);
+            }
+        }
     }
 
     char *password_char = password.c_str();
@@ -1656,11 +1659,18 @@ void ingreso_celular()
     // Serial.println(usuario.isAdmin);
     if (usuario.is_valid())
     {
-        // Guardar los cambios en el compartimento
+        /*/ Guardar los cambios en el compartimento
         Cajas compartimento;
         compartimento.id = compartimento_vacio;
         compartimento.estado = true;
-        write_box(compartimento);
+        write_box(compartimento);*/
+
+        // Actualizar el estado del compartimiento
+        Cajas box = Cajas();
+        box.id = compartimento_vacio;
+        box.estado = false;
+        strcpy(box.propietario, auxNombre.c_str());
+        update_box_state(box);
 
         // Simulación de desconexión utilizando los botones
         pinMode(compartimento_vacio + 44, OUTPUT);
@@ -1669,6 +1679,13 @@ void ingreso_celular()
         digitalWrite(compartimento_vacio + 44, LOW);
 
         Serial.println("Dispositivo ingresado exitosamente.");
+
+        lcd.clear(); // Borra la pantalla LCD.
+        lcd.setCursor(0, 1);
+        lcd.print("Conectado");
+        delay(400);
+        menu_actual = CLIENTE;
+        return;
     }
     else
     {
@@ -1681,8 +1698,8 @@ void ingreso_celular()
             lcd.print("Incorrect");
             lcd.setCursor(0, 1);
             lcd.print("Credentials");
-            ingreso_celular();
-            // ESTADO
+            menu_actual = INGRESAR_CELULAR;
+            return;
         }
         else
         {
@@ -1698,17 +1715,26 @@ void ingreso_celular()
             // Cerrar sesión y volver al menú inicial
             Serial.println("Sesión cerrada. Volviendo al menú inicial.");
             intentos_fallidos = 0; // Reiniciar el contador de intentos fallidos
-
-            menu_principal();
+            menu_actual = MENU_PRINCIPAL;
+            return;
         }
     }
 }
 
+int contador_true = 0;
+
 void retiro_celular()
 {
-    int compartimentos_ocupados = get_box_count();
+    for (int i = 0; i < get_box_count(); i++)
+    {
+        Cajas compartimento = get_box(i);
+        if (compartimento.estado == true)
+        {
+            contador_true++;
+        }
+    }
 
-    if (compartimentos_ocupados == 0)
+    if (contador_true == 0)
     {
         // No hay dispositivos en el sistema
         lcd.clear();
@@ -1718,13 +1744,18 @@ void retiro_celular()
         return;
     }
 
-    if (compartimentos_ocupados == 1)
+    else if (contador_true == 1)
     {
         // El usuario solo tiene un dispositivo en el sistema
         Cajas compartimento = get_box(0);
         retirar_dispositivo(compartimento);
+        // Actualizar el estado del compartimiento
+        update_box_state(compartimento);
+        contador_true--;
+        menu_actual = CLIENTE;
         return;
     }
+    Serial.println(contador_true);
 
     // El usuario tiene más de un dispositivo en el sistema
     lcd.clear();
@@ -1732,11 +1763,15 @@ void retiro_celular()
     lcd.print("Select compartment:");
 
     // Mostrar los compartimentos ocupados en el LCD
-    for (int i = 0; i < compartimentos_ocupados; i++)
+
+    for (int i = 0; i < contador_true; i++)
     {
         Cajas compartimento = get_box(i);
-        lcd.setCursor(0, i + 1);
-        lcd.print(compartimento.id);
+        if (compartimento.estado == true)
+        {
+            lcd.setCursor(0, i + 1);
+            lcd.print(compartimento.id);
+        }
     }
 
     int compartimento_seleccionado = -1;
@@ -1753,7 +1788,7 @@ void retiro_celular()
         }
     }
 
-    if (compartimento_seleccionado >= 0 && compartimento_seleccionado < compartimentos_ocupados)
+    if (compartimento_seleccionado >= 0 && compartimento_seleccionado < contador_true)
     {
         Cajas compartimento = get_box(compartimento_seleccionado);
         retirar_dispositivo(compartimento);
@@ -1835,6 +1870,22 @@ void retirar_dispositivo(Cajas compartimento)
                 }
             }
         }
+        if (Btn_Ok.is_pressed())
+        {
+            Serial.println(password);
+            break;
+        }
+        if (Btn_Cancel.is_pressed())
+        {
+            if (password.length() > 0)
+            {
+                password.remove(password.length() - 1);
+                lcd.setCursor(3, 1);
+                lcd.print("                ");
+                lcd.setCursor(3, 1);
+                lcd.print(password);
+            }
+        }
     }
 
     char *password_char = password.c_str();
@@ -1869,6 +1920,9 @@ void retirar_dispositivo(Cajas compartimento)
         lcd.setCursor(0, 0);
         lcd.print("Device Removed");
         delay(2000);
+        //update_box_state(compartimento.id, false);
+        menu_actual = CLIENTE;
+        return;
     }
     else
     {
@@ -1881,7 +1935,8 @@ void retirar_dispositivo(Cajas compartimento)
             lcd.print("Incorrect");
             lcd.setCursor(0, 1);
             lcd.print("Credentials");
-            // retirar_dispositivo();
+            menu_actual = RETIRAR_CELULAR;
+            return;
         }
         else
         {
@@ -1897,8 +1952,8 @@ void retirar_dispositivo(Cajas compartimento)
             // Cerrar sesión y volver al menú inicial
             Serial.println("Sesión cerrada. Volviendo al menú inicial.");
             intentos_fallidos = 0; // Reiniciar el contador de intentos fallidos
-
-            menu_principal();
+            menu_actual = MENU_PRINCIPAL;
+            return;
         }
     }
 }
