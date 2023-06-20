@@ -32,6 +32,9 @@ String auxNombre = "";
 int intentos_fallidos = 0;
 int intentos_fallidos_login = 0;
 int intentos_fallidos_login_globales = 0;
+int celulares_ingresados = 0;
+int usuarios_activos = 0;
+int cantidad_incidentes = 0;
 // bool button_:state = false;
 
 int contador_logs = 0;
@@ -1297,6 +1300,9 @@ void registro()
     }
     if (!error)
     {
+        Serial.println("Usuarios activos");
+        usuarios_activos++;
+        Serial.println(usuarios_activos);
         usuario.isAdmin = false;
         strcpy(usuario.nombre, nombre_cifrado);
         strcpy(usuario.numero, celular_cifrado);
@@ -1424,9 +1430,9 @@ void menu_cliente()
                 if (opcion.length() > 0)
                 {
                     opcion.remove(opcion.length() - 1);
-                    lcd.setCursor(0, 1);
+                    lcd.setCursor(12, 0);
                     lcd.print("                ");
-                    lcd.setCursor(0, 1);
+                    lcd.setCursor(12, 0);
                     lcd.print(opcion);
                 }
             }
@@ -1673,7 +1679,8 @@ void loop_status()
         lcd.setCursor(0, 2);
         lcd.print("Incidentes: ");
         lcd.setCursor(8, 3);
-        lcd.print("3"); // AQUI DEBEN PONER LOS INCIDENTES CON LOS CELULARES
+        lcd.print("0"); // AQUI DEBEN PONER LOS INCIDENTES CON LOS CELULARES
+        
 
         delay(3000);
 
@@ -1780,7 +1787,7 @@ void ingreso_celular()
                     break;
                 }
 
-                if (password.length() < 8)
+                if (password.length() < 13)
                 {
                     lcd.setCursor(0, 3);
                     lcd.print(password);
@@ -1862,6 +1869,9 @@ void ingreso_celular()
         digitalWrite(compartimento_vacio + 44, HIGH);
         delay(1000);
         digitalWrite(compartimento_vacio + 44, LOW);*/
+        Serial.println("Compartimentos ocupados");
+        celulares_ingresados++;
+        Serial.println(celulares_ingresados);
 
         Serial.println("Dispositivo ingresado exitosamente.");
 
@@ -2079,7 +2089,7 @@ void retirar_dispositivo(Cajas compartimento)
                     break;
                 }
 
-                if (password.length() < 8)
+                if (password.length() < 13)
                 {
                     lcd.setCursor(0, 3);
                     lcd.print(password);
@@ -2144,6 +2154,10 @@ void retirar_dispositivo(Cajas compartimento)
         dobleCifradoXOR(descripcion_cifrado);
         strcpy(log_generado.descripcion, descripcion_cifrado);
         write_log(log_generado);
+
+        Serial.println("Compartimentos usados");
+        celulares_ingresados--;
+        Serial.println(celulares_ingresados);
 
         lcd.clear();
         lcd.setCursor(0, 0);
@@ -2233,6 +2247,9 @@ void eliminar_cuenta()
         if (strcmp(box.nombre, auxNombre.c_str()) == 0)
         {
             // Eliminar usuario
+            Serial.println("Usuarios activos");
+            usuarios_activos--;
+            Serial.println(usuarios_activos);
             update_user_state(auxNombre);
 
             log_generado = Log();

@@ -321,7 +321,7 @@ void reset_eeprom(){
 
     Usuarios admin = Usuarios();
     admin.isAdmin = true;
-    char nombre[] = "admin*94069";// Pruebas solamente "ADMIN*94069"
+    char nombre[] = "admin*94869";// Pruebas solamente "ADMIN*94869"
     char nombre_cifrado[sizeof(nombre)];
     strcpy(nombre_cifrado, nombre);
     dobleCifradoXOR(nombre_cifrado);
