@@ -90,7 +90,7 @@ boolean entradaAceptada() {
 }
 #define LINEA_VACIA "                "
 String recibir_texto_app(char *mensaje, char *titulo);
-void enviar_texto_app(String mensaje);
+void enviar_texto_app(String mensaje, int contador);
 
 
 /* Usuario */
@@ -255,9 +255,8 @@ void limpiarBuffer() {
   }
 }
 
-void enviar_texto_app(String mensaje) {
-  lcd.println("Mostrando en APP");
-  Serial1.println("Mostrar ," + mensaje + String(celulares_ingresados));
+void enviar_texto_app(String mensaje, int contador) {
+  Serial1.println("Mostrar ," + mensaje + String(contador));
   bool hayAlgo = false;
   char recibidos[3];
 
@@ -265,13 +264,13 @@ void enviar_texto_app(String mensaje) {
     while (Serial1.available()) {
       Serial1.readBytes(recibidos, 2);
       hayAlgo = true;
-      Serial.println("LOOP 2 ENVIAR TEXTO");
+      //Serial.println("LOOP 2 ENVIAR TEXTO");
     }
 
     if (hayAlgo && !Serial1.available()) break;
-    Serial.println("LOOP 1 ENVIAR TEXTO");
+    //Serial.println("LOOP 1 ENVIAR TEXTO");
   }
-  delay(2000);
+  delay(3000);
   // Serial.println("EN APP APARECE CELULARES");
   // limpiarBuffer();
   // Serial1.println("Mostrar ,#Intentos fallidos: " + String(intentos_fallidos));
@@ -342,7 +341,7 @@ void conectar_dispositivo() {
   lcd.print("Conectado con exito");
   delay(1000);
   lcd.clear();
-  Serial.println("Final de conectar");
+  Serial.println("CONECTADO CON EXITO");
 }
 
 String recibir_texto_app(char *mensaje, char *titulo) {
@@ -380,7 +379,7 @@ String recibir_texto_app(char *mensaje, char *titulo) {
         nombre_temp[indiceNombre++] = Serial1.read();
 
         Serial.println(nombre_temp);
-        Serial.println("Entro a en enviado algo");
+        //Serial.println("Entro a en enviado algo");
       }
       // CONTROLAR CUANTO HA PASADO DESDE QUE COME...
       if (seEnvioAlgo) {
@@ -393,7 +392,7 @@ String recibir_texto_app(char *mensaje, char *titulo) {
       }
     }
   }
-  Serial.print("Dato obtenido de app");
+  Serial.print("DATOS OBTENIDOS DESDE APP");
   return nombre_temp;
 }
 
@@ -732,11 +731,11 @@ void login() {
     }
 
     else if (!KEYPAD_ACTIVO && APLICACION_ACTIVA && !ya_entro) {
-      Serial.println("App");
+      //Serial.println("App");
 
       nombre = recibir_texto_app("Nombre", "LOGIN");
-      Serial.print(nombre);
-      Serial.print("1");
+      //Serial.print(nombre);
+      //Serial.print("1");
       lcd.setCursor(0, 3);
       lcd.print(nombre);
       ya_entro = true;
@@ -827,10 +826,10 @@ void login() {
         }
       }
     } else if (!KEYPAD_ACTIVO && APLICACION_ACTIVA && !ya_entro) {
-      Serial.println("App");
+      //Serial.println("App");
       password = recibir_texto_app("Password", "LOGIN");
-      Serial.print(password);
-      Serial.print("2");
+      //Serial.print(password);
+      //Serial.print("2");
       lcd.setCursor(0, 3);
       lcd.print(password);
       ya_entro = true;
@@ -1026,11 +1025,11 @@ void registro() {
     }
 
     else if (!KEYPAD_ACTIVO && APLICACION_ACTIVA && !ya_entro) {
-      Serial.println("App");
+      //Serial.println("App");
 
       nombre_registro = recibir_texto_app("Nombre", "REGISTRO");
-      Serial.print(nombre_registro);
-      Serial.print("1");
+      //Serial.print(nombre_registro);
+      //Serial.print("1");
       lcd.setCursor(0, 3);
       lcd.print(nombre_registro);
       ya_entro = true;
@@ -1124,11 +1123,11 @@ void registro() {
     }
 
     else if (!KEYPAD_ACTIVO && APLICACION_ACTIVA && !ya_entro) {
-      Serial.println("App");
+      //Serial.println("App");
 
       celular_registro = recibir_texto_app("Celular", "REGISTRO");
-      Serial.print(celular_registro);
-      Serial.print("1");
+      //Serial.print(celular_registro);
+      //Serial.print("1");
       lcd.setCursor(0, 3);
       lcd.print(celular_registro);
       ya_entro = true;
@@ -1222,11 +1221,11 @@ void registro() {
     }
 
     else if (!KEYPAD_ACTIVO && APLICACION_ACTIVA && !ya_entro) {
-      Serial.println("App");
+      //Serial.println("App");
 
       password_registro = recibir_texto_app("Password", "REGISTRO");
-      Serial.print(password_registro);
-      Serial.print("1");
+      //Serial.print(password_registro);
+      //Serial.print("1");
       lcd.setCursor(0, 3);
       lcd.print(password_registro);
       ya_entro = true;
@@ -1618,7 +1617,8 @@ void loop_status() {
     lcd.setCursor(8, 3);
     lcd.print(String(get_boxes_ocuped()));
 
-    delay(3000);
+    enviar_texto_app("Celulares Ingresados: ", get_boxes_ocuped());
+    //delay(3000);
 
     lcd.clear();
     lcd.setCursor(0, 0);
@@ -1630,7 +1630,8 @@ void loop_status() {
     lcd.setCursor(8, 3);
     lcd.print(String(intentos_fallidos + intentos_fallidos_login_globales));
 
-    delay(3000);
+    enviar_texto_app("Intentos Fallidos: ", intentos_fallidos + intentos_fallidos_login_globales);
+    //delay(3000);
 
     lcd.clear();
     lcd.setCursor(0, 0);
@@ -1642,8 +1643,8 @@ void loop_status() {
     lcd.setCursor(8, 3);
     lcd.print("0");  // AQUI DEBEN PONER LOS INCIDENTES CON LOS CELULARES
 
-
-    delay(3000);
+    enviar_texto_app("Cantidad de Incidentes: ", 0);
+    //delay(3000);
 
     lcd.clear();
     lcd.setCursor(0, 0);
@@ -1655,7 +1656,8 @@ void loop_status() {
     lcd.setCursor(8, 3);
     lcd.print(String(get_user_count() - 1));
 
-    delay(3000);
+    enviar_texto_app("Cantidad de Usuarios: ", get_user_count() - 1);
+    //delay(3000);
 
     end = true;
   }
@@ -1695,6 +1697,7 @@ void ingreso_celular() {
     lcd.setCursor(0, 1);
     lcd.print("Password: ");
   }
+  bool ya_entro = false;
   // lcd.setCursor(0, 0);
   String password = "";
   while (true) {
@@ -1757,12 +1760,15 @@ void ingreso_celular() {
           lcd.print(password);
         }
       }
-    } else if (APLICACION_ACTIVA && !KEYPAD_ACTIVO) {
-      password = recibir_texto_app("Password", "");
+    } else if (APLICACION_ACTIVA && !KEYPAD_ACTIVO && !ya_entro) {
+      password = recibir_texto_app("Password", "CELULAR");
+      lcd.setCursor(0, 3);
+      lcd.print(password);
+      ya_entro = true;
     }
     
     if (Btn_Ok.is_pressed()) {
-      //Serial.println(password);
+      ya_entro = false;
       break;
     }
     if (Btn_Cancel.is_pressed()) {
@@ -1972,6 +1978,7 @@ void retirar_dispositivo(Cajas compartimento) {
     lcd.setCursor(0, 2);
     lcd.print("Password: ");
   }
+  bool ya_entro = false;
   // lcd.setCursor(0, 0);
   String password = "";
   while (true) {
@@ -2034,13 +2041,15 @@ void retirar_dispositivo(Cajas compartimento) {
           lcd.print(password);
         }
       }
-    } else if (!KEYPAD_ACTIVO && APLICACION_ACTIVA)
+    } else if (!KEYPAD_ACTIVO && APLICACION_ACTIVA && !ya_entro)
     {
-      password = recibir_texto_app("Password", "");
+      password = recibir_texto_app("Password", "RETIRO");
+      ya_entro = true;
     }
     
     if (Btn_Ok.is_pressed()) {
       //Serial.println(password);
+      ya_entro = false;
       break;
     }
     if (Btn_Cancel.is_pressed()) {
